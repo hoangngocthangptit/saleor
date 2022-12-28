@@ -4,8 +4,6 @@ import {
 } from "@saleor/graphql";
 
 import { ProductCreateData } from "../components/ProductCreatePage";
-import { ProductVariantCreateData } from "../components/ProductVariantCreatePage/form";
-import { ProductVariantUpdateSubmitData } from "../components/ProductVariantPage/form";
 
 export const validatePrice = (price: string) =>
   price === "" || parseInt(price, 10) < 0;
@@ -36,8 +34,3 @@ export const validateProductCreateData = (data: ProductCreateData) => {
 
   return errors;
 };
-
-export const validateVariantData = (
-  data: ProductVariantCreateData | ProductVariantUpdateSubmitData,
-): ProductErrorWithAttributesFragment[] =>
-  !data.name ? [createEmptyRequiredError("name")] : [];

@@ -3,6 +3,7 @@ from datetime import datetime
 import graphene
 import pytz
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from ....core.permissions import DiscountPermissions
 from ....core.tracing import traced_atomic_transaction
@@ -16,7 +17,6 @@ from ...core.mutations import ModelMutation
 from ...core.scalars import PositiveDecimal
 from ...core.types import DiscountError, NonNullList
 from ...core.validators import validate_end_is_after_start
-from ...plugins.dataloaders import load_plugin_manager
 from ..enums import DiscountValueTypeEnum
 from ..types import Sale
 from .utils import convert_catalogue_info_to_global_ids
@@ -89,30 +89,36 @@ class SaleCreate(SaleUpdateDiscountedPriceMixin, ModelMutation):
             raise ValidationError({"end_date": error})
 
     @classmethod
+    @traced_atomic_transaction()
     def perform_mutation(cls, _root, info, **data):
-        with traced_atomic_transaction():
-            response = super().perform_mutation(_root, info, **data)
-            instance = getattr(response, cls._meta.return_field_name).node
-            manager = load_plugin_manager(info.context)
-            cls.send_sale_notifications(manager, instance)
+        response = super().perform_mutation(_root, info, **data)
+        instance = getattr(response, cls._meta.return_field_name).node
+        cls.send_sale_notifications(info, instance)
         return response
 
     @classmethod
-    def send_sale_notifications(cls, manager, instance):
+    def send_sale_notifications(cls, info, instance):
         current_catalogue = convert_catalogue_info_to_global_ids(
             fetch_catalogue_info(instance)
         )
 
-        cls.call_event(manager.sale_created, instance, current_catalogue)
-        cls.send_sale_toggle_notification(manager, instance, current_catalogue)
+        transaction.on_commit(
+            lambda: info.context.plugins.sale_created(
+                instance,
+                current_catalogue,
+            )
+        )
+
+        cls.send_sale_toggle_notification(info, instance, current_catalogue)
 
     @staticmethod
-    def send_sale_toggle_notification(manager, instance, catalogue):
+    def send_sale_toggle_notification(info, instance, catalogue):
         """Send a notification about starting or ending sale if it hasn't been sent yet.
 
         Send the notification when the start date is before the current date and the
         sale is not already finished.
         """
+        manager = info.context.plugins
         now = datetime.now(pytz.utc)
 
         start_date = instance.start_date

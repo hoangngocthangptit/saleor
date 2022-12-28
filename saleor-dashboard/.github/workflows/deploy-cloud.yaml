@@ -18,16 +18,11 @@ jobs:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       MARKETPLACE_URL: "https://apps.saleor.io/"
-      SALEOR_APPS_ENDPOINT: "https://apps.saleor.io/api/saleor-apps"
       IS_CLOUD_INSTANCE: true
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.client_payload.ref }}
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: ".nvmrc"
       - name: Package
         timeout-minutes: 15
         run: |

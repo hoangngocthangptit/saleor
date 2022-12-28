@@ -25,11 +25,10 @@ greatly reduce the amount of work needed to review your work. -->
 Modify API_URI if you want test instance to use custom backend. CYPRESS_API_URI is optional, use when necessary. -->
 
 API_URI=https://automation-dashboard.staging.saleor.cloud/graphql/
-MARKETPLACE_URL=https://apps.saleor.io
-SALEOR_APPS_ENDPOINT=https://apps.saleor.io/api/saleor-apps
+MARKETPLACE_URL=https://marketplace-gray.vercel.app/
 
 ### Do you want to run more stable tests?
-To run all tests, just select the stable checkbox. To speed up tests, increase the number of containers. Tests will be re-run only when the "run e2e" label is added.
+Tests will be re-run only when the "run e2e" label is added.
 
 1. [ ] stable
 2. [ ] giftCard
@@ -52,7 +51,5 @@ To run all tests, just select the stable checkbox. To speed up tests, increase t
 19. [ ] plugins
 20. [ ] translations
 21. [ ] navigation
-22. [ ] variants
-23. [ ] payments
 
 CONTAINERS=1

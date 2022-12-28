@@ -181,7 +181,6 @@ export const CustomerList: React.FC<CustomerListProps> = ({ params }) => {
         }
         isChecked={isSelected}
         selected={listElements.length}
-        selectedCustomerIds={listElements}
         sort={getSortParams(params)}
         toggle={toggle}
         toggleAll={toggleAll}

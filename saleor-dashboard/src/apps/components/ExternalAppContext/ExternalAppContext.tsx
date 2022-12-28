@@ -40,7 +40,6 @@ export const ExternalAppProvider: React.FC = ({ children }) => {
             src={appData.src}
             appToken={appData.appToken}
             appId={appData.id}
-            params={appData.params}
           />
         )}
       </AppDialog>

@@ -1,6 +1,5 @@
 from ....core.permissions import DiscountPermissions
 from ...core.types import DiscountError
-from ...plugins.dataloaders import load_plugin_manager
 from ..types import Voucher
 from .voucher_add_catalogues import VoucherBaseCatalogueMutation
 
@@ -21,7 +20,6 @@ class VoucherRemoveCatalogues(VoucherBaseCatalogueMutation):
         cls.remove_catalogues_from_node(voucher, input_data)
 
         if input_data:
-            manager = load_plugin_manager(info.context)
-            cls.call_event(manager.voucher_updated, voucher)
+            info.context.plugins.voucher_updated(voucher)
 
         return VoucherRemoveCatalogues(voucher=voucher)

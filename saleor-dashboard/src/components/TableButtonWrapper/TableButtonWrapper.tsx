@@ -1,6 +1,6 @@
 import React from "react";
 
-export interface TableButtonWrapper {
+interface TableButtonWrapper {
   children: React.ReactElement<{
     onClick?: (e: React.MouseEvent<any>) => void;
     href?: string;
@@ -19,7 +19,8 @@ export interface TableButtonWrapper {
  */
 export const TableButtonWrapper = <T extends HTMLElement>({
   children,
-}: TableButtonWrapper) => {
+}: // eslint-disable-next-line @typescript-eslint/no-unused-vars
+TableButtonWrapper) => {
   const onClick = (e: React.MouseEvent<T>) => {
     if (!children.props.href) {
       // <TableRowLink> is a <a> that wraps each <tr>

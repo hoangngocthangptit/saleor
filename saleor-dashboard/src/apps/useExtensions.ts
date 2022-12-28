@@ -27,10 +27,6 @@ export interface ExtensionWithParams extends Omit<Extension, "open"> {
 }
 
 export const extensionMountPoints = {
-  CUSTOMER_LIST: [
-    AppExtensionMountEnum.CUSTOMER_OVERVIEW_CREATE,
-    AppExtensionMountEnum.CUSTOMER_OVERVIEW_MORE_ACTIONS,
-  ],
   PRODUCT_LIST: [
     AppExtensionMountEnum.PRODUCT_OVERVIEW_CREATE,
     AppExtensionMountEnum.PRODUCT_OVERVIEW_MORE_ACTIONS,
@@ -39,7 +35,6 @@ export const extensionMountPoints = {
     AppExtensionMountEnum.ORDER_OVERVIEW_CREATE,
     AppExtensionMountEnum.ORDER_OVERVIEW_MORE_ACTIONS,
   ],
-  CUSTOMER_DETAILS: [AppExtensionMountEnum.CUSTOMER_DETAILS_MORE_ACTIONS],
   ORDER_DETAILS: [AppExtensionMountEnum.ORDER_DETAILS_MORE_ACTIONS],
   PRODUCT_DETAILS: [AppExtensionMountEnum.PRODUCT_DETAILS_MORE_ACTIONS],
   NAVIGATION_SIDEBAR: [
@@ -86,39 +81,12 @@ const mapToMenuItem = ({ label, id, open }: Extension) => ({
 export const mapToMenuItems = (extensions: ExtensionWithParams[]) =>
   extensions.map(mapToMenuItem);
 
-export const mapToMenuItemsForProductOverviewActions = (
-  extensions: ExtensionWithParams[],
-  productIds: string[],
-) =>
-  extensions.map(extension =>
-    mapToMenuItem({ ...extension, open: () => extension.open({ productIds }) }),
-  );
-
 export const mapToMenuItemsForProductDetails = (
   extensions: ExtensionWithParams[],
   productId: string,
 ) =>
   extensions.map(extension =>
     mapToMenuItem({ ...extension, open: () => extension.open({ productId }) }),
-  );
-
-export const mapToMenuItemsForCustomerDetails = (
-  extensions: ExtensionWithParams[],
-  customerId: string,
-) =>
-  extensions.map(extension =>
-    mapToMenuItem({ ...extension, open: () => extension.open({ customerId }) }),
-  );
-
-export const mapToMenuItemsForCustomerOverviewActions = (
-  extensions: ExtensionWithParams[],
-  customerIds: string[],
-) =>
-  extensions.map(extension =>
-    mapToMenuItem({
-      ...extension,
-      open: () => extension.open({ customerIds }),
-    }),
   );
 
 export const mapToMenuItemsForOrderDetails = (

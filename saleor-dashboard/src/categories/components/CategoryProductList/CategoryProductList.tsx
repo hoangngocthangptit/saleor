@@ -1,4 +1,4 @@
-import { TableBody, TableCell, TableFooter } from "@material-ui/core";
+import { TableBody, TableCell, TableFooter, TableRow } from "@material-ui/core";
 import Checkbox from "@saleor/components/Checkbox";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
 import Skeleton from "@saleor/components/Skeleton";
@@ -96,9 +96,9 @@ export const CategoryProductList: React.FC<CategoryProductListProps> = props => 
           </TableCell>
         </TableHead>
         <TableFooter>
-          <TableRowLink>
+          <TableRow>
             <TablePaginationWithContext colSpan={numberOfColumns} />
-          </TableRowLink>
+          </TableRow>
         </TableFooter>
         <TableBody>
           {renderCollection(
@@ -133,14 +133,14 @@ export const CategoryProductList: React.FC<CategoryProductListProps> = props => 
               );
             },
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={numberOfColumns}>
                   <FormattedMessage
                     id="Q1Uzbb"
                     defaultMessage="No products found"
                   />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </TableBody>

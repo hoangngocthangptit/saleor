@@ -2,6 +2,7 @@ import {
   TableBody,
   TableCell,
   TableFooter,
+  TableRow,
   Typography,
 } from "@material-ui/core";
 import Checkbox from "@saleor/components/Checkbox";
@@ -122,9 +123,9 @@ const ProductTypeList: React.FC<ProductTypeListProps> = props => {
         </TableCell>
       </TableHead>
       <TableFooter>
-        <TableRowLink>
+        <TableRow>
           <TablePaginationWithContext colSpan={numberOfColumns} />
-        </TableRowLink>
+        </TableRow>
       </TableFooter>
       <TableBody>
         {renderCollection(
@@ -204,14 +205,14 @@ const ProductTypeList: React.FC<ProductTypeListProps> = props => {
             );
           },
           () => (
-            <TableRowLink>
+            <TableRow>
               <TableCell colSpan={numberOfColumns}>
                 <FormattedMessage
                   id="0nLsyM"
                   defaultMessage="No product types found"
                 />
               </TableCell>
-            </TableRowLink>
+            </TableRow>
           ),
         )}
       </TableBody>

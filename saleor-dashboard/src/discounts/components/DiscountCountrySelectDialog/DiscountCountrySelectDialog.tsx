@@ -5,6 +5,7 @@ import {
   DialogTitle,
   TableBody,
   TableCell,
+  TableRow,
   TextField,
   Typography,
 } from "@material-ui/core";
@@ -15,7 +16,6 @@ import Form from "@saleor/components/Form";
 import FormSpacer from "@saleor/components/FormSpacer";
 import Hr from "@saleor/components/Hr";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { CountryWithCodeFragment } from "@saleor/graphql";
 import { SubmitPromise } from "@saleor/hooks/useForm";
 import { ConfirmButtonTransitionState } from "@saleor/macaw-ui";
@@ -130,7 +130,7 @@ const DiscountCountrySelectDialog: React.FC<DiscountCountrySelectDialogProps> = 
                       const isChecked = countrySelectionMap[country.code];
 
                       return (
-                        <TableRowLink key={country.code}>
+                        <TableRow key={country.code}>
                           <TableCell className={classes.wideCell}>
                             {country.country}
                           </TableCell>
@@ -163,7 +163,7 @@ const DiscountCountrySelectDialog: React.FC<DiscountCountrySelectDialogProps> = 
                               }
                             />
                           </TableCell>
-                        </TableRowLink>
+                        </TableRow>
                       );
                     })}
                   </TableBody>

@@ -9,7 +9,6 @@ import {
   createCheckout,
 } from "../../../support/api/requests/Checkout";
 import { getOrder } from "../../../support/api/requests/Order";
-import { updatePlugin } from "../../../support/api/requests/Plugins";
 import { getDefaultChannel } from "../../../support/api/utils/channelsUtils";
 import {
   addAdyenPayment,
@@ -67,19 +66,15 @@ describe("Adyen payments", () => {
         });
       })
       .then(
-        ({ warehouse: warehouseResp, shippingMethod: shippingMethodResp }) => {
+        ({
+          warehouse: warehouseResp,
+          shippingZone: shippingZoneResp,
+          shippingMethod: shippingMethodResp,
+        }) => {
           warehouse = warehouseResp;
           shippingMethod = shippingMethodResp;
         },
-      )
-      .then(() => {
-        updatePlugin(
-          "mirumee.payments.adyen",
-          "adyen-auto-capture",
-          true,
-          defaultChannel.id,
-        );
-      });
+      );
     createTypeAttributeAndCategoryForProduct({ name })
       .then(({ productType, attribute, category }) => {
         createProductInChannel({

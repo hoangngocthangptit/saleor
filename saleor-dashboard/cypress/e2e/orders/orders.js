@@ -107,7 +107,7 @@ describe("Orders", () => {
 
   it(
     "should create order with selected channel. TC: SALEOR_2104",
-    { tags: ["@orders", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@orders", "@allEnv", "@stable"] },
     () => {
       cy.visit(urlList.orders)
         .get(ORDERS_SELECTORS.createOrder)
@@ -125,12 +125,12 @@ describe("Orders", () => {
 
   it(
     "should not be possible to change channel in order. TC: SALEOR_2105",
-    { tags: ["@orders", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@orders", "@allEnv", "@stable"] },
     () => {
       createOrder({
         customerId: customer.id,
         channelId: defaultChannel.id,
-        shippingMethod,
+        shippingMethodId: shippingMethod.id,
         variantsList,
         address,
       }).then(order => {
@@ -145,13 +145,13 @@ describe("Orders", () => {
 
   it(
     "should cancel fulfillment. TC: SALEOR_2106",
-    { tags: ["@orders", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@orders", "@allEnv", "@stable"] },
     () => {
       let order;
       createFulfilledOrder({
         customerId: customer.id,
         channelId: defaultChannel.id,
-        shippingMethod,
+        shippingMethodId: shippingMethod.id,
         variantsList,
         address,
         warehouse: warehouse.id,
@@ -184,13 +184,13 @@ describe("Orders", () => {
 
   it(
     "should make a refund. TC: 2107",
-    { tags: ["@orders", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@orders", "@allEnv", "@stable"] },
     () => {
       let order;
       createReadyToFulfillOrder({
         customerId: customer.id,
         channelId: defaultChannel.id,
-        shippingMethod,
+        shippingMethodId: shippingMethod.id,
         variantsList,
         address,
       })

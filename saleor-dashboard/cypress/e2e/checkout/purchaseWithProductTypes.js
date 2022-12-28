@@ -49,7 +49,7 @@ describe("As an unlogged customer I want to order physical and digital products"
 
   it(
     "should purchase digital product as unlogged customer. TC: SALEOR_0402",
-    { tags: ["@checkout", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@checkout", "@allEnv", "@stable"] },
     () => {
       createAndCompleteCheckoutWithoutShipping({
         channelSlug: defaultChannel.slug,
@@ -73,7 +73,7 @@ describe("As an unlogged customer I want to order physical and digital products"
 
   it(
     "should purchase physical product as unlogged customer. TC: SALEOR_0403",
-    { tags: ["@checkout", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@checkout", "@allEnv", "@stable"] },
     () => {
       createWaitingForCaptureOrder({
         channelSlug: defaultChannel.slug,

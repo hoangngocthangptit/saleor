@@ -35,7 +35,7 @@ describe("Tests for customer", () => {
 
   it(
     "should create customer. TC: SALEOR_1201",
-    { tags: ["@customer", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@customer", "@allEnv", "@stable"] },
     () => {
       const randomName = `${startsWith}${faker.datatype.number()}`;
       const email = `${randomName}@example.com`;

@@ -5,10 +5,8 @@ from ....order import FulfillmentStatus
 from ....order import models as order_models
 from ....order.actions import create_refund_fulfillment
 from ....payment import PaymentError
-from ...app.dataloaders import load_app
 from ...core.scalars import PositiveDecimal
 from ...core.types import NonNullList, OrderError
-from ...plugins.dataloaders import load_plugin_manager
 from ..types import Fulfillment, Order
 from .fulfillment_refund_and_return_product_base import (
     FulfillmentRefundAndReturnProductBase,
@@ -133,18 +131,17 @@ class FulfillmentRefundProducts(FulfillmentRefundAndReturnProductBase):
     def perform_mutation(cls, _root, info, **data):
         cleaned_input = cls.clean_input(info, data.get("order"), data.get("input"))
         order = cleaned_input["order"]
-        manager = load_plugin_manager(info.context)
+
         try:
-            app = load_app(info.context)
             refund_fulfillment = create_refund_fulfillment(
                 info.context.user,
-                app,
+                info.context.app,
                 order,
                 cleaned_input["payment"],
                 cleaned_input["transactions"],
                 cleaned_input.get("order_lines", []),
                 cleaned_input.get("fulfillment_lines", []),
-                manager,
+                info.context.plugins,
                 cleaned_input["amount_to_refund"],
                 cleaned_input["include_shipping_costs"],
             )

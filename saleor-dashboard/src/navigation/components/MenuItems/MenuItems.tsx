@@ -2,6 +2,7 @@ import { Card, CardActions, Paper, Typography } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import CardTitle from "@saleor/components/CardTitle";
 import Skeleton from "@saleor/components/Skeleton";
+import { MenuDetailsFragment } from "@saleor/graphql";
 import { buttonMessages } from "@saleor/intl";
 import {
   Button,
@@ -10,29 +11,21 @@ import {
   makeStyles,
   useTheme,
 } from "@saleor/macaw-ui";
-import { RecursiveMenuItem } from "@saleor/navigation/types";
 import classNames from "classnames";
 import React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import SortableTree, { NodeRendererProps } from "react-sortable-tree";
+import SortableTree, { NodeRendererProps, TreeItem } from "react-sortable-tree";
 
 import Draggable from "../../../icons/Draggable";
 import { MenuItemType } from "../MenuItemDialog";
-import {
-  getDiff,
-  getNodeData,
-  getNodeQuantity,
-  MenuTreeItem,
-  TreeItemProps,
-  TreeOperation,
-} from "./tree";
+import { getDiff, getNodeData, getNodeQuantity, TreeOperation } from "./tree";
 
 const NODE_HEIGHT = 56;
 const NODE_MARGIN = 40;
 
 export interface MenuItemsProps {
   canUndo: boolean;
-  items: RecursiveMenuItem[];
+  items: MenuDetailsFragment["items"];
   onChange: (operations: TreeOperation[]) => void;
   onItemAdd: () => void;
   onItemClick: (id: string, type: MenuItemType) => void;
@@ -138,7 +131,7 @@ const Placeholder: React.FC = props => {
   );
 };
 
-const Node: React.FC<NodeRendererProps<TreeItemProps>> = props => {
+const Node: React.FC<NodeRendererProps> = props => {
   const {
     node,
     path,
@@ -211,6 +204,7 @@ const Node: React.FC<NodeRendererProps<TreeItemProps>> = props => {
 const MenuItems: React.FC<MenuItemsProps> = props => {
   const {
     canUndo,
+
     items,
     onChange,
     onItemAdd,
@@ -265,7 +259,7 @@ const MenuItems: React.FC<MenuItemsProps> = props => {
               getNodeData(item, onChange, onItemClick, onItemEdit),
             )}
             theme={{
-              nodeContentRenderer: Node,
+              nodeContentRenderer: Node as any,
             }}
             onChange={newTree =>
               onChange(
@@ -273,11 +267,11 @@ const MenuItems: React.FC<MenuItemsProps> = props => {
                   items.map(item =>
                     getNodeData(item, onChange, onItemClick, onItemEdit),
                   ),
-                  newTree as MenuTreeItem[],
+                  newTree as TreeItem[],
                 ),
               )
             }
-            placeholderRenderer={Placeholder}
+            placeholderRenderer={Placeholder as any}
           />
         )}
       </div>

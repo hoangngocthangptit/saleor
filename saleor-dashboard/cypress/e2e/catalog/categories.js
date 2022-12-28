@@ -75,7 +75,7 @@ describe("As an admin I want to manage categories", () => {
 
   it(
     "should be able to create category. TC: SALEOR_0201",
-    { tags: ["@category", "@allEnv", "@oldRelease"] },
+    { tags: ["@category", "@allEnv"] },
     () => {
       const categoryName = `${startsWith}${faker.datatype.number()}`;
 

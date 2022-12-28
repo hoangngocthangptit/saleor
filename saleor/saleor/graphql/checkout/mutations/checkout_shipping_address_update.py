@@ -29,9 +29,6 @@ from ...core.descriptions import (
 from ...core.mutations import BaseMutation
 from ...core.scalars import UUID
 from ...core.types import CheckoutError
-from ...discount.dataloaders import load_discounts
-from ...plugins.dataloaders import load_plugin_manager
-from ...site.dataloaders import get_site_promise
 from ..types import Checkout
 from .checkout_create import CheckoutAddressValidationRules
 from .utils import (
@@ -97,19 +94,18 @@ class CheckoutShippingAddressUpdate(BaseMutation, I18nMixin):
             ).prefetch_related("product__product_type")
         )  # FIXME: is this prefetch needed?
         quantities = [line_info.line.quantity for line_info in lines]
-        site = get_site_promise(info.context).get()
         check_lines_quantity(
             variants,
             quantities,
             country,
             channel_slug,
-            site.settings.limit_quantity_per_checkout,
+            info.context.site.settings.limit_quantity_per_checkout,
             delivery_method_info=delivery_method_info,
             # Set replace=True to avoid existing_lines and quantities from
             # being counted twice by the check_stock_quantity_bulk
             replace=True,
             existing_lines=lines,
-            check_reservations=is_reservation_enabled(site.settings),
+            check_reservations=is_reservation_enabled(info.context.site.settings),
         )
 
     @classmethod
@@ -157,8 +153,9 @@ class CheckoutShippingAddressUpdate(BaseMutation, I18nMixin):
                 "enable_fields_normalization", True
             ),
         )
-        manager = load_plugin_manager(info.context)
-        discounts = load_discounts(info.context)
+
+        discounts = info.context.discounts
+        manager = info.context.plugins
         shipping_channel_listings = checkout.channel.shipping_method_listings.all()
         checkout_info = fetch_checkout_info(
             checkout, lines, discounts, manager, shipping_channel_listings
@@ -198,6 +195,6 @@ class CheckoutShippingAddressUpdate(BaseMutation, I18nMixin):
             + invalidate_prices_updated_fields
         )
 
-        cls.call_event(manager.checkout_updated, checkout)
+        manager.checkout_updated(checkout)
 
         return CheckoutShippingAddressUpdate(checkout=checkout)

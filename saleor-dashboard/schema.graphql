@@ -1384,7 +1384,6 @@ type AttributeDeleted implements Event {
 enum AttributeEntityTypeEnum {
   PAGE
   PRODUCT
-  PRODUCT_VARIANT
 }
 
 type AttributeError {
@@ -1423,7 +1422,6 @@ input AttributeFilterInput {
   type: AttributeTypeEnum
   inCollection: ID
   inCategory: ID
-  slugs: [String!]
 
   """
   Specifies the channel by which the data should be filtered. 
@@ -1739,15 +1737,11 @@ input AttributeValueCreateInput {
   Represents the text of the attribute value, includes formatting.
   
   Rich text format. For reference see https://editorjs.io/
-  
-  DEPRECATED: this field will be removed in Saleor 4.0.The rich text attribute hasn't got predefined value, so can be specified only from instance that supports the given attribute.
   """
   richText: JSONString
 
   """
   Represents the text of the attribute value, plain text without formating.
-  
-  DEPRECATED: this field will be removed in Saleor 4.0.The plain text attribute hasn't got predefined value, so can be specified only from instance that supports the given attribute.
   """
   plainText: String
 
@@ -1951,15 +1945,11 @@ input AttributeValueUpdateInput {
   Represents the text of the attribute value, includes formatting.
   
   Rich text format. For reference see https://editorjs.io/
-  
-  DEPRECATED: this field will be removed in Saleor 4.0.The rich text attribute hasn't got predefined value, so can be specified only from instance that supports the given attribute.
   """
   richText: JSONString
 
   """
   Represents the text of the attribute value, plain text without formating.
-  
-  DEPRECATED: this field will be removed in Saleor 4.0.The plain text attribute hasn't got predefined value, so can be specified only from instance that supports the given attribute.
   """
   plainText: String
 
@@ -2060,28 +2050,6 @@ type BulkStockError {
 
   """Index of an input list item that caused the error."""
   index: Int
-}
-
-"""
-Synchronous webhook for calculating checkout/order taxes.
-
-Added in Saleor 3.7.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type CalculateTaxes implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-  taxBase: TaxableObject!
 }
 
 input CardInput {
@@ -2362,7 +2330,6 @@ input CategoryFilterInput {
   search: String
   metadata: [MetadataFilter!]
   ids: [ID!]
-  slugs: [String!]
 }
 
 input CategoryInput {
@@ -2387,20 +2354,6 @@ input CategoryInput {
 
   """Alt text for a product media."""
   backgroundImageAlt: String
-
-  """
-  Fields required to update the category metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the category private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
 }
 
 enum CategorySortField {
@@ -3035,15 +2988,6 @@ type Checkout implements Node & ObjectWithMetadata {
   """The price of the checkout before shipping, with taxes included."""
   subtotalPrice: TaxedMoney!
 
-  """
-  Returns True if checkout has to be exempt from taxes.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  taxExemption: Boolean!
-
   """The checkout's token."""
   token: UUID!
 
@@ -3465,13 +3409,6 @@ input CheckoutLineInput {
   Note: this API is currently in Feature Preview and can be subject to changes at later point.
   """
   forceNewLine: Boolean = false
-
-  """
-  Fields required to update the object's metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
 }
 
 input CheckoutLineUpdateInput {
@@ -3527,30 +3464,6 @@ type CheckoutLinesUpdate {
   checkout: Checkout
   checkoutErrors: [CheckoutError!]! @deprecated(reason: "This field will be removed in Saleor 4.0. Use `errors` field instead.")
   errors: [CheckoutError!]!
-}
-
-"""
-Event sent when checkout metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type CheckoutMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The checkout the event relates to."""
-  checkout: Checkout
 }
 
 """Create a new payment for given checkout."""
@@ -3913,20 +3826,6 @@ input CollectionCreateInput {
   """
   publicationDate: Date
 
-  """
-  Fields required to update the collection metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the collection private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
-
   """List of products to be added to the collection."""
   products: [ID!]
 }
@@ -4028,7 +3927,6 @@ input CollectionFilterInput {
   search: String
   metadata: [MetadataFilter!]
   ids: [ID!]
-  slugs: [String!]
 
   """
   Specifies the channel by which the data should be filtered. 
@@ -4070,47 +3968,6 @@ input CollectionInput {
   DEPRECATED: this field will be removed in Saleor 4.0.
   """
   publicationDate: Date
-
-  """
-  Fields required to update the collection metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the collection private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
-}
-
-"""
-Event sent when collection metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type CollectionMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The collection the event relates to."""
-  collection(
-    """Slug of a channel for which the data should be returned."""
-    channel: String
-  ): Collection
 }
 
 enum CollectionPublished {
@@ -4764,13 +4621,6 @@ input CustomerFilterInput {
   placedOrders: DateRangeInput
   search: String
   metadata: [MetadataFilter!]
-
-  """
-  Filter by ids. 
-  
-  Added in Saleor 3.8.
-  """
-  ids: [ID!]
   updatedAt: DateTimeRangeInput
 }
 
@@ -4798,30 +4648,6 @@ input CustomerInput {
 
   """User language code."""
   languageCode: LanguageCodeEnum
-}
-
-"""
-Event sent when customer user metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type CustomerMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The user the event relates to."""
-  user: User
 }
 
 """
@@ -5043,20 +4869,6 @@ input DigitalContentInput {
 
   """Overwrite default automatic_fulfillment setting for variant."""
   automaticFulfillment: Boolean
-
-  """
-  Fields required to update the digital content metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the digital content private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
 }
 
 """
@@ -5087,20 +4899,6 @@ input DigitalContentUploadInput {
 
   """Overwrite default automatic_fulfillment setting for variant."""
   automaticFulfillment: Boolean
-
-  """
-  Fields required to update the digital content metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the digital content private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
 
   """Represents an file in a multipart request."""
   contentFile: Upload!
@@ -6113,33 +5911,6 @@ type FulfillmentLine implements Node {
 }
 
 """
-Event sent when fulfillment metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type FulfillmentMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The fulfillment the event relates to."""
-  fulfillment: Fulfillment
-
-  """The order the fulfillment belongs to."""
-  order: Order
-}
-
-"""
 Refund products. 
 
 Requires one of the following permissions: MANAGE_ORDERS.
@@ -6819,30 +6590,6 @@ input GiftCardFilterInput {
 }
 
 """
-Event sent when gift card metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type GiftCardMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The gift card the event relates to."""
-  giftCard: GiftCard
-}
-
-"""
 Resend a gift card.
 
 Added in Saleor 3.1.
@@ -6923,21 +6670,14 @@ input GiftCardSettingsUpdateInput {
 }
 
 enum GiftCardSortField {
-  """Sort gift cards by product."""
+  """Sort orders by product."""
   PRODUCT
 
-  """Sort gift cards by used by."""
+  """Sort orders by used by."""
   USED_BY
 
-  """Sort gift cards by current balance."""
+  """Sort orders by current balance."""
   CURRENT_BALANCE
-
-  """
-  Sort gift cards by created at.
-  
-  Added in Saleor 3.8.
-  """
-  CREATED_AT
 }
 
 input GiftCardSortingInput {
@@ -8244,15 +7984,6 @@ type Manifest {
   Note: this API is currently in Feature Preview and can be subject to changes at later point.
   """
   webhooks: [AppManifestWebhook!]!
-
-  """
-  The audience that will be included in all JWT tokens for the app.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  audience: String
 }
 
 type Margin {
@@ -8496,7 +8227,6 @@ input MenuFilterInput {
   search: String
   slug: [String!]
   metadata: [MetadataFilter!]
-  slugs: [String!]
 }
 
 input MenuInput {
@@ -9097,23 +8827,6 @@ type Mutation {
     """List of shipping zone IDs."""
     shippingZoneIds: [ID!]!
   ): WarehouseShippingZoneUnassign
-
-  """
-  Exempt checkout or order from charging the taxes. When tax exemption is enabled, taxes won't be charged for the checkout or order. Taxes may still be calculated in cases when product prices are entered with the tax included and the net price needs to be known.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point. 
-  
-  Requires one of the following permissions: MANAGE_TAXES.
-  """
-  taxExemptionManage(
-    """ID of the Checkout or Order object."""
-    id: ID!
-
-    """Determines if a taxes should be exempt."""
-    taxExemption: Boolean!
-  ): TaxExemptionManage
 
   """
   Creates a new staff notification recipient. 
@@ -9846,14 +9559,7 @@ type Mutation {
   """
   productVariantDelete(
     """ID of a product variant to delete."""
-    id: ID
-
-    """
-    SKU of a product variant to delete.
-    
-    Added in Saleor 3.8.
-    """
-    sku: String
+    id: ID!
   ): ProductVariantDelete
 
   """
@@ -9876,14 +9582,7 @@ type Mutation {
   """
   productVariantBulkDelete(
     """List of product variant IDs to delete."""
-    ids: [ID!]
-
-    """
-    List of product variant SKUs to delete.
-    
-    Added in Saleor 3.8.
-    """
-    skus: [String!]
+    ids: [ID!]!
   ): ProductVariantBulkDelete
 
   """
@@ -9905,13 +9604,8 @@ type Mutation {
   Requires one of the following permissions: MANAGE_PRODUCTS.
   """
   productVariantStocksDelete(
-    """SKU of product variant for which stocks will be deleted."""
-    sku: String
-
     """ID of product variant for which stocks will be deleted."""
-    variantId: ID
-
-    """Input list of warehouse IDs."""
+    variantId: ID!
     warehouseIds: [ID!]
   ): ProductVariantStocksDelete
 
@@ -9921,14 +9615,11 @@ type Mutation {
   Requires one of the following permissions: MANAGE_PRODUCTS.
   """
   productVariantStocksUpdate(
-    """SKU of product variant for which stocks will be updated."""
-    sku: String
-
-    """Input list of stocks to create or update."""
+    """Input list of stocks to create."""
     stocks: [StockInput!]!
 
-    """ID of a product variant for which stocks will be updated."""
-    variantId: ID
+    """ID of a product variant for which stocks will be created."""
+    variantId: ID!
   ): ProductVariantStocksUpdate
 
   """
@@ -9938,17 +9629,10 @@ type Mutation {
   """
   productVariantUpdate(
     """ID of a product variant to update."""
-    id: ID
+    id: ID!
 
     """Fields required to update a product variant."""
     input: ProductVariantInput!
-
-    """
-    SKU of a product variant to update.
-    
-    Added in Saleor 3.8.
-    """
-    sku: String
   ): ProductVariantUpdate
 
   """
@@ -9985,19 +9669,12 @@ type Mutation {
   """
   productVariantChannelListingUpdate(
     """ID of a product variant to update."""
-    id: ID
+    id: ID!
 
     """
     List of fields required to create or upgrade product variant channel listings.
     """
     input: [ProductVariantChannelListingAddInput!]!
-
-    """
-    SKU of a product variant to update.
-    
-    Added in Saleor 3.8.
-    """
-    sku: String
   ): ProductVariantChannelListingUpdate
 
   """
@@ -11423,13 +11100,6 @@ type Mutation {
     """
     id: ID
 
-    """
-    Fields required to update the checkout metadata.
-    
-    Added in Saleor 3.8.
-    """
-    metadata: [MetadataInput!]
-
     """Client-side generated data required to finalize the payment."""
     paymentData: JSONString
 
@@ -11473,7 +11143,7 @@ type Mutation {
     checkoutId: ID
 
     """
-    ID of customer to attach to checkout. Requires IMPERSONATE_USER permission when customerId is different than the logged-in user.
+    ID of customer to attach to checkout. Can be used to attach customer to checkout by staff or app. Requires IMPERSONATE_USER permission.
     """
     customerId: ID
 
@@ -11839,20 +11509,6 @@ type Mutation {
     id: ID!
 
     """
-    Fields required to update the checkout metadata.
-    
-    Added in Saleor 3.8.
-    """
-    metadata: [MetadataInput!]
-
-    """
-    Fields required to update the checkout private metadata.
-    
-    Added in Saleor 3.8.
-    """
-    privateMetadata: [MetadataInput!]
-
-    """
     Determines if checkout should be removed after creating an order. Default true.
     """
     removeCheckout: Boolean = true
@@ -12174,15 +11830,6 @@ type Mutation {
 
   """Create JWT token."""
   tokenCreate(
-    """
-    The audience that will be included to JWT tokens with prefix `custom:`.
-    
-    Added in Saleor 3.8.
-    
-    Note: this API is currently in Feature Preview and can be subject to changes at later point.
-    """
-    audience: String
-
     """Email of a user."""
     email: String!
 
@@ -12851,15 +12498,6 @@ type Order implements Node & ObjectWithMetadata {
   chargeStatus: OrderChargeStatusEnum!
 
   """
-  Returns True if order has to be exempt from taxes.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  taxExemption: Boolean!
-
-  """
   List of transactions for the order. Requires one of the following permissions: MANAGE_ORDERS, HANDLE_PAYMENTS.
   
   Added in Saleor 3.4.
@@ -12929,7 +12567,7 @@ type Order implements Node & ObjectWithMetadata {
   isShippingRequired: Boolean!
 
   """
-  The delivery method selected for this order.
+  The delivery method selected for this checkout.
   
   Added in Saleor 3.1.
   
@@ -13947,30 +13585,6 @@ type OrderMarkAsPaid {
   errors: [OrderError!]!
 }
 
-"""
-Event sent when order metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type OrderMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The order the event relates to."""
-  order: Order
-}
-
 """An enumeration."""
 enum OrderOriginEnum {
   CHECKOUT
@@ -14556,7 +14170,6 @@ input PageFilterInput {
   metadata: [MetadataFilter!]
   pageTypes: [ID!]
   ids: [ID!]
-  slugs: [String!]
 }
 
 """
@@ -14636,11 +14249,7 @@ enum PageSortField {
   """Sort pages by visibility."""
   VISIBILITY
 
-  """
-  Sort pages by creation date.
-  
-  DEPRECATED: this field will be removed in Saleor 4.0.
-  """
+  """Sort pages by creation date."""
   CREATION_DATE
 
   """
@@ -14656,13 +14265,6 @@ enum PageSortField {
   DEPRECATED: this field will be removed in Saleor 4.0.
   """
   PUBLISHED_AT
-
-  """
-  Sort pages by creation date.
-  
-  DEPRECATED: this field will be removed in Saleor 4.0.
-  """
-  CREATED_AT
 }
 
 input PageSortingInput {
@@ -14954,7 +14556,6 @@ type PageTypeDeleted implements Event {
 
 input PageTypeFilterInput {
   search: String
-  slugs: [String!]
 }
 
 """
@@ -15360,12 +14961,6 @@ enum PaymentErrorCode {
 }
 
 input PaymentFilterInput {
-  """
-  Filter by ids. 
-  
-  Added in Saleor 3.8.
-  """
-  ids: [ID!]
   checkouts: [ID!]
 }
 
@@ -15600,10 +15195,6 @@ enum PermissionEnum {
   IMPERSONATE_USER
   MANAGE_APPS
   MANAGE_OBSERVABILITY
-  MANAGE_CHECKOUTS
-  HANDLE_CHECKOUTS
-  HANDLE_TAXES
-  MANAGE_TAXES
   MANAGE_CHANNELS
   MANAGE_DISCOUNTS
   MANAGE_PLUGINS
@@ -15618,6 +15209,9 @@ enum PermissionEnum {
   MANAGE_SHIPPING
   MANAGE_SETTINGS
   MANAGE_TRANSLATIONS
+  MANAGE_CHECKOUTS
+  HANDLE_CHECKOUTS
+  HANDLE_TAXES
 }
 
 """
@@ -16454,20 +16048,6 @@ input ProductCreateInput {
   """Defines the product rating value."""
   rating: Float
 
-  """
-  Fields required to update the product metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the product private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
-
   """ID of the type that product belongs to."""
   productType: ID!
 }
@@ -16612,34 +16192,6 @@ input ProductFilterInput {
   stocks: ProductStockFilterInput
   search: String
   metadata: [MetadataFilter!]
-
-  """
-  Filter by the publication date. 
-  
-  Added in Saleor 3.8.
-  """
-  publishedFrom: DateTime
-
-  """
-  Filter by availability for purchase. 
-  
-  Added in Saleor 3.8.
-  """
-  isAvailable: Boolean
-
-  """
-  Filter by the date of availability for purchase. 
-  
-  Added in Saleor 3.8.
-  """
-  availableFrom: DateTime
-
-  """
-  Filter by visibility in product listings. 
-  
-  Added in Saleor 3.8.
-  """
-  isVisibleInListing: Boolean
   price: PriceRangeInput
 
   """Filter by the lowest variant price after discounts."""
@@ -16653,7 +16205,6 @@ input ProductFilterInput {
   giftCard: Boolean
   ids: [ID!]
   hasPreorderedVariants: Boolean
-  slugs: [String!]
 
   """
   Specifies the channel by which the data should be filtered. 
@@ -16729,20 +16280,6 @@ input ProductInput {
 
   """Defines the product rating value."""
   rating: Float
-
-  """
-  Fields required to update the product metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the product private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
 }
 
 """Represents a product media."""
@@ -16854,36 +16391,6 @@ input ProductMediaUpdateInput {
   alt: String
 }
 
-"""
-Event sent when product metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type ProductMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The product the event relates to."""
-  product(
-    """Slug of a channel for which the data should be returned."""
-    channel: String
-  ): Product
-
-  """The category of the product."""
-  category: Category
-}
-
 input ProductOrder {
   """Specifies the direction in which to sort products."""
   direction: OrderDirection!
@@ -16970,13 +16477,6 @@ enum ProductOrderField {
 
   """Sort products by rating."""
   RATING
-
-  """
-  Sort products by creation date.
-  
-  Added in Saleor 3.8.
-  """
-  CREATED_AT
 }
 
 """Represents availability of a product in the storefront."""
@@ -17278,7 +16778,6 @@ input ProductTypeFilterInput {
   metadata: [MetadataFilter!]
   kind: ProductTypeKindEnum
   ids: [ID!]
-  slugs: [String!]
 }
 
 input ProductTypeInput {
@@ -17655,20 +17154,6 @@ input ProductVariantBulkCreateInput {
   """
   quantityLimitPerCustomer: Int
 
-  """
-  Fields required to update the product variant metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the product variant private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
-
   """Stocks of a product available for sale."""
   stocks: [StockInput!]
 
@@ -17810,20 +17295,6 @@ input ProductVariantCreateInput {
   """
   quantityLimitPerCustomer: Int
 
-  """
-  Fields required to update the product variant metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the product variant private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
-
   """Product ID of which type is the variant."""
   product: ID!
 
@@ -17939,47 +17410,6 @@ input ProductVariantInput {
   Note: this API is currently in Feature Preview and can be subject to changes at later point.
   """
   quantityLimitPerCustomer: Int
-
-  """
-  Fields required to update the product variant metadata.
-  
-  Added in Saleor 3.8.
-  """
-  metadata: [MetadataInput!]
-
-  """
-  Fields required to update the product variant private metadata.
-  
-  Added in Saleor 3.8.
-  """
-  privateMetadata: [MetadataInput!]
-}
-
-"""
-Event sent when product variant metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type ProductVariantMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The product variant the event relates to."""
-  productVariant(
-    """Slug of a channel for which the data should be returned."""
-    channel: String
-  ): ProductVariant
 }
 
 """
@@ -18843,11 +18273,7 @@ type Query {
     """Sort menus."""
     sortBy: MenuSortingInput
 
-    """
-    Filtering options for menus. 
-    
-    `slug`: This field will be removed in Saleor 4.0. Use `slugs` instead.
-    """
+    """Filtering options for menus."""
     filter: MenuFilterInput
 
     """Return the elements in the list that come before the specified cursor."""
@@ -20941,33 +20367,6 @@ input ShippingZoneFilterInput {
 }
 
 """
-Event sent when shipping zone metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type ShippingZoneMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The shipping zone the event relates to."""
-  shippingZone(
-    """Slug of a channel for which the data should be returned."""
-    channel: String
-  ): ShippingZone
-}
-
-"""
 Updates a new shipping zone. 
 
 Requires one of the following permissions: MANAGE_SHIPPING.
@@ -21817,45 +21216,6 @@ type Subscription {
   event: Event
 }
 
-"""
-Exempt checkout or order from charging the taxes. When tax exemption is enabled, taxes won't be charged for the checkout or order. Taxes may still be calculated in cases when product prices are entered with the tax included and the net price needs to be known.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point. 
-
-Requires one of the following permissions: MANAGE_TAXES.
-"""
-type TaxExemptionManage {
-  taxableObject: TaxSourceObject
-  errors: [TaxExemptionManageError!]!
-}
-
-type TaxExemptionManageError {
-  """
-  Name of a field that caused the error. A value of `null` indicates that the error isn't associated with a particular field.
-  """
-  field: String
-
-  """The error message."""
-  message: String
-
-  """The error code."""
-  code: TaxExemptionManageErrorCode!
-}
-
-"""An enumeration."""
-enum TaxExemptionManageErrorCode {
-  GRAPHQL_ERROR
-  INVALID
-  NOT_FOUND
-  NOT_EDITABLE_ORDER
-}
-
-union TaxSourceLine = CheckoutLine | OrderLine
-
-union TaxSourceObject = Checkout | Order
-
 """Representation of tax types fetched from tax gateway."""
 type TaxType {
   """Description of the tax type."""
@@ -21863,66 +21223,6 @@ type TaxType {
 
   """External tax code used to identify given tax group."""
   taxCode: String
-}
-
-"""Taxable object."""
-type TaxableObject {
-  """The source object related to this tax object."""
-  sourceObject: TaxSourceObject!
-
-  """Determines if prices contain entered tax.."""
-  pricesEnteredWithTax: Boolean!
-
-  """The currency of the object."""
-  currency: String!
-
-  """The price of shipping method."""
-  shippingPrice: Money!
-
-  """The address data."""
-  address: Address
-
-  """List of discounts."""
-  discounts: [TaxableObjectDiscount!]!
-
-  """List of lines assigned to the object."""
-  lines: [TaxableObjectLine!]!
-  channel: Channel!
-}
-
-"""Taxable object discount."""
-type TaxableObjectDiscount {
-  """The name of the discount."""
-  name: String
-
-  """The amount of the discount."""
-  amount: Money!
-}
-
-type TaxableObjectLine {
-  """The source line related to this tax line."""
-  sourceLine: TaxSourceLine!
-
-  """Number of items."""
-  quantity: Int!
-
-  """Determines if taxes are being charged for the product."""
-  chargeTaxes: Boolean!
-
-  """The product name."""
-  productName: String!
-
-  """The variant name."""
-  variantName: String!
-
-  """The product sku."""
-  productSku: String
-
-  """Price of the single item in the order line."""
-  unitPrice: Money!
-
-  """Price of the order line."""
-  totalPrice: Money!
 }
 
 """
@@ -22244,34 +21544,6 @@ type TransactionItem implements Node & ObjectWithMetadata {
 
   """List of all transaction's events."""
   events: [TransactionEvent!]!
-}
-
-"""
-Event sent when transaction item metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type TransactionItemMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """
-  Look up a transaction.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  transaction: TransactionItem
 }
 
 """An enumeration."""
@@ -22636,28 +21908,6 @@ type User implements Node & ObjectWithMetadata {
     """Slug of a channel for which the data should be returned."""
     channel: String
   ): [ID!]
-
-  """
-  Returns checkouts assigned to this user.
-  
-  Added in Saleor 3.8.
-  """
-  checkouts(
-    """Slug of a channel for which the data should be returned."""
-    channel: String
-
-    """Return the elements in the list that come before the specified cursor."""
-    before: String
-
-    """Return the elements in the list that come after the specified cursor."""
-    after: String
-
-    """Return the first n elements from the list."""
-    first: Int
-
-    """Return the last n elements from the list."""
-    last: Int
-  ): CheckoutCountableConnection
 
   """List of the user gift cards."""
   giftCards(
@@ -23365,33 +22615,6 @@ input VoucherInput {
 }
 
 """
-Event sent when voucher metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type VoucherMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The voucher the event relates to."""
-  voucher(
-    """Slug of a channel for which the data should be returned."""
-    channel: String
-  ): Voucher
-}
-
-"""
 Removes products, categories, collections from a voucher. 
 
 Requires one of the following permissions: MANAGE_DISCOUNTS.
@@ -23758,31 +22981,6 @@ input WarehouseFilterInput {
   ids: [ID!]
   isPrivate: Boolean
   channels: [ID!]
-  slugs: [String!]
-}
-
-"""
-Event sent when warehouse metadata is updated.
-
-Added in Saleor 3.8.
-
-Note: this API is currently in Feature Preview and can be subject to changes at later point.
-"""
-type WarehouseMetadataUpdated implements Event {
-  """Time of the event."""
-  issuedAt: DateTime
-
-  """Saleor version that triggered the event."""
-  version: String
-
-  """The user or application that triggered the event."""
-  issuingPrincipal: IssuingPrincipal
-
-  """The application receiving the webhook."""
-  recipient: App
-
-  """The warehouse the event relates to."""
-  warehouse: Warehouse
 }
 
 """
@@ -24127,15 +23325,6 @@ enum WebhookEventTypeAsyncEnum {
   """A gift card status is changed."""
   GIFT_CARD_STATUS_CHANGED
 
-  """
-  A gift card metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  GIFT_CARD_METADATA_UPDATED
-
   """A new menu created."""
   MENU_CREATED
 
@@ -24176,15 +23365,6 @@ enum WebhookEventTypeAsyncEnum {
   """An order is fulfilled."""
   ORDER_FULFILLED
 
-  """
-  An order metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  ORDER_METADATA_UPDATED
-
   """A draft order is created."""
   DRAFT_ORDER_CREATED
 
@@ -24224,15 +23404,6 @@ enum WebhookEventTypeAsyncEnum {
   """A customer account is deleted."""
   CUSTOMER_DELETED
 
-  """
-  A customer account metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  CUSTOMER_METADATA_UPDATED
-
   """A new collection is created."""
   COLLECTION_CREATED
 
@@ -24242,15 +23413,6 @@ enum WebhookEventTypeAsyncEnum {
   """A collection is deleted."""
   COLLECTION_DELETED
 
-  """
-  A collection metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  COLLECTION_METADATA_UPDATED
-
   """A new product is created."""
   PRODUCT_CREATED
 
@@ -24259,15 +23421,6 @@ enum WebhookEventTypeAsyncEnum {
 
   """A product is deleted."""
   PRODUCT_DELETED
-
-  """
-  A product metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  PRODUCT_METADATA_UPDATED
 
   """A new product variant is created."""
   PRODUCT_VARIANT_CREATED
@@ -24284,15 +23437,6 @@ enum WebhookEventTypeAsyncEnum {
   """A product variant is back in stock."""
   PRODUCT_VARIANT_BACK_IN_STOCK
 
-  """
-  A product variant metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  PRODUCT_VARIANT_METADATA_UPDATED
-
   """A new checkout is created."""
   CHECKOUT_CREATED
 
@@ -24300,15 +23444,6 @@ enum WebhookEventTypeAsyncEnum {
   A checkout is updated. It also triggers all updates related to the checkout.
   """
   CHECKOUT_UPDATED
-
-  """
-  A checkout metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  CHECKOUT_METADATA_UPDATED
 
   """A new fulfillment is created."""
   FULFILLMENT_CREATED
@@ -24318,15 +23453,6 @@ enum WebhookEventTypeAsyncEnum {
 
   """A fulfillment is approved."""
   FULFILLMENT_APPROVED
-
-  """
-  A fulfillment metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  FULFILLMENT_METADATA_UPDATED
 
   """User notification triggered."""
   NOTIFY_USER
@@ -24376,15 +23502,6 @@ enum WebhookEventTypeAsyncEnum {
   """A shipping zone is deleted."""
   SHIPPING_ZONE_DELETED
 
-  """
-  A shipping zone metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  SHIPPING_ZONE_METADATA_UPDATED
-
   """A new staff user is created."""
   STAFF_CREATED
 
@@ -24396,15 +23513,6 @@ enum WebhookEventTypeAsyncEnum {
 
   """An action requested for transaction."""
   TRANSACTION_ACTION_REQUEST
-
-  """
-  Transaction item metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  TRANSACTION_ITEM_METADATA_UPDATED
 
   """A new translation is created."""
   TRANSLATION_CREATED
@@ -24421,15 +23529,6 @@ enum WebhookEventTypeAsyncEnum {
   """A warehouse is deleted."""
   WAREHOUSE_DELETED
 
-  """
-  A warehouse metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  WAREHOUSE_METADATA_UPDATED
-
   """A new voucher created."""
   VOUCHER_CREATED
 
@@ -24438,15 +23537,6 @@ enum WebhookEventTypeAsyncEnum {
 
   """A voucher is deleted."""
   VOUCHER_DELETED
-
-  """
-  A voucher metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  VOUCHER_METADATA_UPDATED
 
   """An observability event is created."""
   OBSERVABILITY
@@ -24529,15 +23619,6 @@ enum WebhookEventTypeEnum {
   """A gift card status is changed."""
   GIFT_CARD_STATUS_CHANGED
 
-  """
-  A gift card metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  GIFT_CARD_METADATA_UPDATED
-
   """A new menu created."""
   MENU_CREATED
 
@@ -24578,15 +23659,6 @@ enum WebhookEventTypeEnum {
   """An order is fulfilled."""
   ORDER_FULFILLED
 
-  """
-  An order metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  ORDER_METADATA_UPDATED
-
   """A draft order is created."""
   DRAFT_ORDER_CREATED
 
@@ -24626,15 +23698,6 @@ enum WebhookEventTypeEnum {
   """A customer account is deleted."""
   CUSTOMER_DELETED
 
-  """
-  A customer account metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  CUSTOMER_METADATA_UPDATED
-
   """A new collection is created."""
   COLLECTION_CREATED
 
@@ -24644,15 +23707,6 @@ enum WebhookEventTypeEnum {
   """A collection is deleted."""
   COLLECTION_DELETED
 
-  """
-  A collection metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  COLLECTION_METADATA_UPDATED
-
   """A new product is created."""
   PRODUCT_CREATED
 
@@ -24661,15 +23715,6 @@ enum WebhookEventTypeEnum {
 
   """A product is deleted."""
   PRODUCT_DELETED
-
-  """
-  A product metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  PRODUCT_METADATA_UPDATED
 
   """A new product variant is created."""
   PRODUCT_VARIANT_CREATED
@@ -24686,15 +23731,6 @@ enum WebhookEventTypeEnum {
   """A product variant is back in stock."""
   PRODUCT_VARIANT_BACK_IN_STOCK
 
-  """
-  A product variant metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  PRODUCT_VARIANT_METADATA_UPDATED
-
   """A new checkout is created."""
   CHECKOUT_CREATED
 
@@ -24702,15 +23738,6 @@ enum WebhookEventTypeEnum {
   A checkout is updated. It also triggers all updates related to the checkout.
   """
   CHECKOUT_UPDATED
-
-  """
-  A checkout metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  CHECKOUT_METADATA_UPDATED
 
   """A new fulfillment is created."""
   FULFILLMENT_CREATED
@@ -24720,15 +23747,6 @@ enum WebhookEventTypeEnum {
 
   """A fulfillment is approved."""
   FULFILLMENT_APPROVED
-
-  """
-  A fulfillment metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  FULFILLMENT_METADATA_UPDATED
 
   """User notification triggered."""
   NOTIFY_USER
@@ -24778,15 +23796,6 @@ enum WebhookEventTypeEnum {
   """A shipping zone is deleted."""
   SHIPPING_ZONE_DELETED
 
-  """
-  A shipping zone metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  SHIPPING_ZONE_METADATA_UPDATED
-
   """A new staff user is created."""
   STAFF_CREATED
 
@@ -24798,15 +23807,6 @@ enum WebhookEventTypeEnum {
 
   """An action requested for transaction."""
   TRANSACTION_ACTION_REQUEST
-
-  """
-  Transaction item metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  TRANSACTION_ITEM_METADATA_UPDATED
 
   """A new translation is created."""
   TRANSLATION_CREATED
@@ -24823,15 +23823,6 @@ enum WebhookEventTypeEnum {
   """A warehouse is deleted."""
   WAREHOUSE_DELETED
 
-  """
-  A warehouse metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  WAREHOUSE_METADATA_UPDATED
-
   """A new voucher created."""
   VOUCHER_CREATED
 
@@ -24840,15 +23831,6 @@ enum WebhookEventTypeEnum {
 
   """A voucher is deleted."""
   VOUCHER_DELETED
-
-  """
-  A voucher metadata is updated.
-  
-  Added in Saleor 3.8.
-  
-  Note: this API is currently in Feature Preview and can be subject to changes at later point.
-  """
-  VOUCHER_METADATA_UPDATED
 
   """An observability event is created."""
   OBSERVABILITY
@@ -24979,7 +23961,6 @@ enum WebhookSampleEventTypeEnum {
   GIFT_CARD_UPDATED
   GIFT_CARD_DELETED
   GIFT_CARD_STATUS_CHANGED
-  GIFT_CARD_METADATA_UPDATED
   MENU_CREATED
   MENU_UPDATED
   MENU_DELETED
@@ -24992,7 +23973,6 @@ enum WebhookSampleEventTypeEnum {
   ORDER_UPDATED
   ORDER_CANCELLED
   ORDER_FULFILLED
-  ORDER_METADATA_UPDATED
   DRAFT_ORDER_CREATED
   DRAFT_ORDER_UPDATED
   DRAFT_ORDER_DELETED
@@ -25006,28 +23986,22 @@ enum WebhookSampleEventTypeEnum {
   CUSTOMER_CREATED
   CUSTOMER_UPDATED
   CUSTOMER_DELETED
-  CUSTOMER_METADATA_UPDATED
   COLLECTION_CREATED
   COLLECTION_UPDATED
   COLLECTION_DELETED
-  COLLECTION_METADATA_UPDATED
   PRODUCT_CREATED
   PRODUCT_UPDATED
   PRODUCT_DELETED
-  PRODUCT_METADATA_UPDATED
   PRODUCT_VARIANT_CREATED
   PRODUCT_VARIANT_UPDATED
   PRODUCT_VARIANT_DELETED
   PRODUCT_VARIANT_OUT_OF_STOCK
   PRODUCT_VARIANT_BACK_IN_STOCK
-  PRODUCT_VARIANT_METADATA_UPDATED
   CHECKOUT_CREATED
   CHECKOUT_UPDATED
-  CHECKOUT_METADATA_UPDATED
   FULFILLMENT_CREATED
   FULFILLMENT_CANCELED
   FULFILLMENT_APPROVED
-  FULFILLMENT_METADATA_UPDATED
   NOTIFY_USER
   PAGE_CREATED
   PAGE_UPDATED
@@ -25044,22 +24018,18 @@ enum WebhookSampleEventTypeEnum {
   SHIPPING_ZONE_CREATED
   SHIPPING_ZONE_UPDATED
   SHIPPING_ZONE_DELETED
-  SHIPPING_ZONE_METADATA_UPDATED
   STAFF_CREATED
   STAFF_UPDATED
   STAFF_DELETED
   TRANSACTION_ACTION_REQUEST
-  TRANSACTION_ITEM_METADATA_UPDATED
   TRANSLATION_CREATED
   TRANSLATION_UPDATED
   WAREHOUSE_CREATED
   WAREHOUSE_UPDATED
   WAREHOUSE_DELETED
-  WAREHOUSE_METADATA_UPDATED
   VOUCHER_CREATED
   VOUCHER_UPDATED
   VOUCHER_DELETED
-  VOUCHER_METADATA_UPDATED
   OBSERVABILITY
 }
 

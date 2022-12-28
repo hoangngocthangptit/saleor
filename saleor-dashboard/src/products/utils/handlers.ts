@@ -1,10 +1,10 @@
 import {
   ChannelData,
+  ChannelPreorderArgs,
   ChannelPriceAndPreorderData,
   ChannelPriceArgs,
   ChannelPriceData,
 } from "@saleor/channels/utils";
-import { ProductChannelListingAddInput } from "@saleor/graphql";
 import { FormChange, UseFormResult } from "@saleor/hooks/useForm";
 import moment from "moment";
 
@@ -18,6 +18,26 @@ export function createChannelsPriceChangeHandler(
 
     const updatedChannels = channelListings.map(channel =>
       channel.id === id ? { ...channel, costPrice, price } : channel,
+    );
+
+    updateChannels(updatedChannels);
+
+    triggerChange();
+  };
+}
+
+export function createChannelsPreorderChangeHandler(
+  channelListings: ChannelData[],
+  updateChannels: (data: ChannelData[]) => void,
+  triggerChange: () => void,
+) {
+  return (id: string, preorderData: ChannelPreorderArgs) => {
+    const { preorderThreshold, unitsSold } = preorderData;
+
+    const updatedChannels = channelListings.map(channel =>
+      channel.id === id
+        ? { ...channel, preorderThreshold, unitsSold }
+        : channel,
     );
 
     updateChannels(updatedChannels);
@@ -102,17 +122,9 @@ export const getChannelsInput = (channels: ChannelPriceAndPreorderData[]) =>
     },
   }));
 
-export const getAvailabilityVariables = (
-  channels: ChannelData[],
-): ProductChannelListingAddInput[] =>
+export const getAvailabilityVariables = (channels: ChannelData[]) =>
   channels.map(channel => {
-    const {
-      isAvailableForPurchase,
-      availableForPurchase,
-      isPublished,
-      publicationDate,
-      visibleInListings,
-    } = channel;
+    const { isAvailableForPurchase, availableForPurchase } = channel;
     const isAvailable =
       availableForPurchase && !isAvailableForPurchase
         ? true
@@ -125,9 +137,9 @@ export const getAvailabilityVariables = (
           : availableForPurchase,
       channelId: channel.id,
       isAvailableForPurchase: isAvailable,
-      isPublished,
-      publicationDate,
-      visibleInListings,
+      isPublished: channel.isPublished,
+      publicationDate: channel.publicationDate,
+      visibleInListings: channel.visibleInListings,
     };
   });
 

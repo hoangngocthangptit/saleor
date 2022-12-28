@@ -3,6 +3,7 @@ import {
   CardContent,
   TableBody,
   TableCell,
+  TableRow,
   Typography,
 } from "@material-ui/core";
 import { ChannelShippingData } from "@saleor/channels/utils";
@@ -10,7 +11,6 @@ import CardTitle from "@saleor/components/CardTitle";
 import PriceField from "@saleor/components/PriceField";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
 import TableHead from "@saleor/components/TableHead";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { ShippingChannelsErrorFragment } from "@saleor/graphql";
 import {
   getFormChannelError,
@@ -91,7 +91,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
               const error = getFormChannelError(formErrors.price, channel.id);
 
               return (
-                <TableRowLink key={channel.id}>
+                <TableRow key={channel.id}>
                   <TableCell>
                     <Typography>{channel.name}</Typography>
                   </TableCell>
@@ -117,7 +117,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
                       hint={error && getShippingErrorMessage(error, intl)}
                     />
                   </TableCell>
-                </TableRowLink>
+                </TableRow>
               );
             })}
           </TableBody>

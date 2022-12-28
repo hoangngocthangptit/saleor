@@ -12,7 +12,6 @@ from ...channel.mutations import BaseChannelListingMutation
 from ...core.scalars import PositiveDecimal
 from ...core.types import DiscountError, NonNullList
 from ...core.validators import validate_price_precision
-from ...plugins.dataloaders import load_plugin_manager
 from ..types import Voucher
 
 
@@ -178,10 +177,10 @@ class VoucherChannelListingUpdate(BaseChannelListingMutation):
         voucher.channel_listings.filter(channel_id__in=remove_channels).delete()
 
     @classmethod
+    @traced_atomic_transaction()
     def save(cls, voucher, cleaned_input):
-        with traced_atomic_transaction():
-            cls.add_channels(voucher, cleaned_input.get("add_channels", []))
-            cls.remove_channels(voucher, cleaned_input.get("remove_channels", []))
+        cls.add_channels(voucher, cleaned_input.get("add_channels", []))
+        cls.remove_channels(voucher, cleaned_input.get("remove_channels", []))
 
     @classmethod
     def perform_mutation(cls, _root, info, id, input):
@@ -196,8 +195,7 @@ class VoucherChannelListingUpdate(BaseChannelListingMutation):
             raise ValidationError(errors)
 
         cls.save(voucher, cleaned_input)
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.voucher_updated, voucher)
+        info.context.plugins.voucher_updated(voucher)
 
         return VoucherChannelListingUpdate(
             voucher=ChannelContext(node=voucher, channel_slug=None)

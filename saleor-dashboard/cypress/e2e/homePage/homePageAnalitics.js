@@ -115,7 +115,7 @@ describe("As an admin I want to see correct information on dashboard home page",
       .then(() => {
         createReadyToFulfillOrder({
           customerId: customer.id,
-          shippingMethod,
+          shippingMethodId: shippingMethod.id,
           channelId: defaultChannel.id,
           variantsList: createdVariants,
           address,

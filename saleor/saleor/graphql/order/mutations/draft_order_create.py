@@ -3,6 +3,7 @@ from typing import Dict, List
 
 import graphene
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from graphene.types import InputObjectType
 
 from ....account.models import User
@@ -21,16 +22,13 @@ from ....order.utils import (
 )
 from ...account.i18n import I18nMixin
 from ...account.types import AddressInput
-from ...app.dataloaders import load_app
 from ...channel.types import Channel
 from ...core.descriptions import ADDED_IN_36, PREVIEW_FEATURE
 from ...core.mutations import ModelMutation
 from ...core.scalars import PositiveDecimal
 from ...core.types import NonNullList, OrderError
-from ...plugins.dataloaders import load_plugin_manager
 from ...product.types import ProductVariant
 from ...shipping.utils import get_shipping_model_by_object_id
-from ...site.dataloaders import get_site_promise
 from ..types import Order
 from ..utils import (
     OrderLineData,
@@ -115,8 +113,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
         billing_address = data.pop("billing_address", None)
         redirect_url = data.pop("redirect_url", None)
         channel_id = data.pop("channel_id", None)
-        manager = load_plugin_manager(info.context)
-        site = get_site_promise(info.context).get()
+
         shipping_method = get_shipping_model_by_object_id(
             object_id=data.pop("shipping_method", None), raise_error=False
         )
@@ -145,11 +142,11 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
         cleaned_input["shipping_method"] = shipping_method
         cleaned_input["status"] = OrderStatus.DRAFT
         cleaned_input["origin"] = OrderOrigin.DRAFT
-        display_gross_prices = site.settings.display_gross_prices
+        display_gross_prices = info.context.site.settings.display_gross_prices
         cleaned_input["display_gross_prices"] = display_gross_prices
 
         cls.clean_addresses(
-            info, instance, cleaned_input, shipping_address, billing_address, manager
+            info, instance, cleaned_input, shipping_address, billing_address
         )
 
         if redirect_url:
@@ -234,7 +231,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
 
     @classmethod
     def clean_addresses(
-        cls, info, instance, cleaned_input, shipping_address, billing_address, manager
+        cls, info, instance, cleaned_input, shipping_address, billing_address
     ):
         if shipping_address:
             shipping_address = cls.validate_address(
@@ -243,7 +240,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
                 instance=instance.shipping_address,
                 info=info,
             )
-            shipping_address = manager.change_user_address(
+            shipping_address = info.context.plugins.change_user_address(
                 shipping_address, "shipping", user=instance
             )
             cleaned_input["shipping_address"] = shipping_address
@@ -254,7 +251,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
                 instance=instance.billing_address,
                 info=info,
             )
-            billing_address = manager.change_user_address(
+            billing_address = info.context.plugins.change_user_address(
                 billing_address, "billing", user=instance
             )
             cleaned_input["billing_address"] = billing_address
@@ -268,7 +265,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
             raise ValidationError({"redirect_url": error})
 
     @staticmethod
-    def _save_addresses(instance: models.Order, cleaned_input):
+    def _save_addresses(info, instance: models.Order, cleaned_input):
         shipping_address = cleaned_input.get("shipping_address")
         if shipping_address:
             shipping_address.save()
@@ -279,21 +276,15 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
             instance.billing_address = billing_address.get_copy()
 
     @staticmethod
-    def _parse_shipping_method_name(instance: models.Order, cleaned_input):
-        shipping_method = cleaned_input.get("shipping_method")
-        if shipping_method:
-            instance.shipping_method_name = shipping_method.name
-
-    @staticmethod
-    def _save_lines(info, instance, lines_data, app, site, manager):
+    def _save_lines(info, instance, lines_data):
         if lines_data:
             lines = []
             for line_data in lines_data:
                 new_line = create_order_line(
                     instance,
                     line_data,
-                    manager,
-                    site.settings,
+                    info.context.plugins,
+                    info.context.site.settings,
                 )
                 lines.append(new_line)
 
@@ -301,12 +292,12 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
             events.order_added_products_event(
                 order=instance,
                 user=info.context.user,
-                app=app,
+                app=info.context.app,
                 order_lines=lines,
             )
 
     @classmethod
-    def _commit_changes(cls, info, instance, cleaned_input, is_new_instance, app):
+    def _commit_changes(cls, info, instance, cleaned_input, is_new_instance):
         if shipping_method := cleaned_input["shipping_method"]:
             instance.shipping_method_name = shipping_method.name
         super().save(info, instance, cleaned_input)
@@ -314,7 +305,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
         # Create draft created event if the instance is from scratch
         if is_new_instance:
             events.draft_order_created_event(
-                order=instance, user=info.context.user, app=app
+                order=instance, user=info.context.user, app=info.context.app
             )
 
         instance.save(
@@ -328,56 +319,44 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
 
     @classmethod
     def save(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        app = load_app(info.context)
-        site = get_site_promise(info.context).get()
         return cls._save_draft_order(
-            info,
-            instance,
-            cleaned_input,
-            is_new_instance=True,
-            app=app,
-            site=site,
-            manager=manager,
+            info, instance, cleaned_input, is_new_instance=True
         )
 
     @classmethod
-    def _save_draft_order(
-        cls, info, instance, cleaned_input, *, is_new_instance, app, site, manager
-    ):
-        with traced_atomic_transaction():
-            # Process addresses
-            cls._save_addresses(instance, cleaned_input)
+    @traced_atomic_transaction()
+    def _save_draft_order(cls, info, instance, cleaned_input, *, is_new_instance):
+        # Process addresses
+        cls._save_addresses(info, instance, cleaned_input)
 
-            # Parse shipping name
-            cls._parse_shipping_method_name(instance, cleaned_input)
+        # Save any changes create/update the draft
+        cls._commit_changes(info, instance, cleaned_input, is_new_instance)
 
-            # Save any changes create/update the draft
-            cls._commit_changes(info, instance, cleaned_input, is_new_instance, app)
+        try:
+            # Process any lines to add
+            cls._save_lines(info, instance, cleaned_input.get("lines_data"))
+        except TaxError as tax_error:
+            raise ValidationError(
+                "Unable to calculate taxes - %s" % str(tax_error),
+                code=OrderErrorCode.TAX_ERROR.value,
+            )
 
-            try:
-                # Process any lines to add
-                cls._save_lines(
-                    info, instance, cleaned_input.get("lines_data"), app, site, manager
-                )
-            except TaxError as tax_error:
-                raise ValidationError(
-                    "Unable to calculate taxes - %s" % str(tax_error),
-                    code=OrderErrorCode.TAX_ERROR.value,
-                )
+        if is_new_instance:
+            transaction.on_commit(
+                lambda: info.context.plugins.draft_order_created(instance)
+            )
 
-            if is_new_instance:
-                cls.call_event(manager.draft_order_created, instance)
+        else:
+            transaction.on_commit(
+                lambda: info.context.plugins.draft_order_updated(instance)
+            )
 
-            else:
-                cls.call_event(manager.draft_order_updated, instance)
+        # Post-process the results
+        updated_fields = ["weight", "search_vector", "updated_at"]
+        if cls.should_invalidate_prices(instance, cleaned_input, is_new_instance):
+            invalidate_order_prices(instance)
+            updated_fields.append("should_refresh_prices")
+        recalculate_order_weight(instance)
+        update_order_search_vector(instance, save=False)
 
-            # Post-process the results
-            updated_fields = ["weight", "search_vector", "updated_at"]
-            if cls.should_invalidate_prices(instance, cleaned_input, is_new_instance):
-                invalidate_order_prices(instance)
-                updated_fields.append("should_refresh_prices")
-            recalculate_order_weight(instance)
-            update_order_search_vector(instance, save=False)
-
-            instance.save(update_fields=updated_fields)
+        instance.save(update_fields=updated_fields)

@@ -6,10 +6,8 @@ from ....order.actions import clean_mark_order_as_paid, mark_order_as_paid
 from ....order.calculations import fetch_order_prices_if_expired
 from ....order.error_codes import OrderErrorCode
 from ....order.search import update_order_search_vector
-from ...app.dataloaders import load_app
 from ...core.mutations import BaseMutation
 from ...core.types import OrderError
-from ...plugins.dataloaders import load_plugin_manager
 from ..types import Order
 from .utils import try_payment_action
 
@@ -40,15 +38,17 @@ class OrderMarkAsPaid(BaseMutation):
     @classmethod
     def perform_mutation(cls, _root, info, **data):
         order = cls.get_node_or_error(info, data.get("id"), only_type=Order)
-        manager = load_plugin_manager(info.context)
+        manager = info.context.plugins
         order, _ = fetch_order_prices_if_expired(order, manager)
         transaction_reference = data.get("transaction_reference")
         cls.clean_billing_address(order)
         user = info.context.user
-        app = load_app(info.context)
+        app = info.context.app
         try_payment_action(order, user, app, None, clean_mark_order_as_paid, order)
 
-        mark_order_as_paid(order, user, app, manager, transaction_reference)
+        mark_order_as_paid(
+            order, user, app, info.context.plugins, transaction_reference
+        )
 
         update_order_search_vector(order)
 

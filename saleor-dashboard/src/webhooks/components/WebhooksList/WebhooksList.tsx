@@ -1,4 +1,10 @@
-import { Card, TableBody, TableCell, TableHead } from "@material-ui/core";
+import {
+  Card,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import { Button } from "@saleor/components/Button";
 import CardTitle from "@saleor/components/CardTitle";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
@@ -52,7 +58,7 @@ const WebhooksList: React.FC<WebhooksListProps> = ({
       />
       <ResponsiveTable className={classes.table}>
         <TableHead>
-          <TableRowLink>
+          <TableRow>
             <TableCellHeader>
               {intl.formatMessage(commonMessages.name)}
             </TableCellHeader>
@@ -64,7 +70,7 @@ const WebhooksList: React.FC<WebhooksListProps> = ({
             >
               <FormattedMessage {...messages.action} />
             </TableCell>
-          </TableRowLink>
+          </TableRow>
         </TableHead>
         <TableBody>
           {renderCollection(
@@ -121,11 +127,11 @@ const WebhooksList: React.FC<WebhooksListProps> = ({
               </TableRowLink>
             ),
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={numberOfColumns}>
                   {intl.formatMessage(messages.noWebhooks)}
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </TableBody>

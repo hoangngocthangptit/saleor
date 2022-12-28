@@ -13,6 +13,7 @@ from typing import (
     Union,
 )
 
+from django.utils.encoding import smart_text
 from django.utils.functional import SimpleLazyObject
 
 from ..discount import DiscountInfo, VoucherType
@@ -132,7 +133,7 @@ class ShippingMethodInfo(DeliveryMethodBase):
 
     @property
     def delivery_method_name(self) -> Dict[str, Optional[str]]:
-        return {"shipping_method_name": str(self.delivery_method.name)}
+        return {"shipping_method_name": smart_text(self.delivery_method.name)}
 
     @property
     def delivery_method_order_field(self) -> dict:
@@ -172,7 +173,7 @@ class CollectionPointInfo(DeliveryMethodBase):
 
     @property
     def delivery_method_name(self) -> Dict[str, Optional[str]]:
-        return {"collection_point_name": str(self.delivery_method)}
+        return {"collection_point_name": smart_text(self.delivery_method)}
 
     def get_warehouse_filter_lookup(self) -> Dict[str, Any]:
         return (

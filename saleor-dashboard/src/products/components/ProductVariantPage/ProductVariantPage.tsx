@@ -1,5 +1,5 @@
 import {
-  getReferenceAttributeEntityTypeFromAttribute,
+  getAttributeValuesFromReferences,
   mergeAttributeValues,
 } from "@saleor/attributes/utils/data";
 import { ChannelPriceData } from "@saleor/channels/utils";
@@ -41,7 +41,6 @@ import ProductVariantCheckoutSettings from "../ProductVariantCheckoutSettings/Pr
 import ProductVariantEndPreorderDialog from "../ProductVariantEndPreorderDialog";
 import ProductVariantMediaSelectDialog from "../ProductVariantImageSelectDialog";
 import ProductVariantMedia from "../ProductVariantMedia";
-import ProductVariantName from "../ProductVariantName";
 import ProductVariantNavigation from "../ProductVariantNavigation";
 import ProductVariantPrice from "../ProductVariantPrice";
 import ProductVariantSetDefault from "../ProductVariantSetDefault";
@@ -129,7 +128,7 @@ const ProductVariantPage: React.FC<ProductVariantPageProps> = ({
   channelErrors,
   defaultVariantId,
   defaultWeightUnit,
-  errors: apiErrors,
+  errors,
   header,
   loading,
   placeholderImage,
@@ -234,7 +233,6 @@ const ProductVariantPage: React.FC<ProductVariantPageProps> = ({
             change,
             data,
             formErrors,
-            validationErrors,
             isSaveDisabled,
             handlers,
             submit,
@@ -246,8 +244,6 @@ const ProductVariantPage: React.FC<ProductVariantPageProps> = ({
             const selectionAttributes = data.attributes.filter(
               byAttributeScope(VariantAttributeScope.VARIANT_SELECTION),
             );
-
-            const errors = [...apiErrors, ...validationErrors];
 
             return (
               <>
@@ -263,13 +259,6 @@ const ProductVariantPage: React.FC<ProductVariantPageProps> = ({
                     />
                   </div>
                   <div>
-                    <ProductVariantName
-                      value={data.name}
-                      onChange={change}
-                      disabled={loading}
-                      errors={errors}
-                    />
-                    <CardSpacer />
                     <VariantDetailsChannelsAvailabilityCard
                       variant={variant}
                       onManageClick={toggleManageChannels}
@@ -400,13 +389,12 @@ const ProductVariantPage: React.FC<ProductVariantPageProps> = ({
                 />
                 {canOpenAssignReferencesAttributeDialog && (
                   <AssignAttributeValueDialog
-                    entityType={getReferenceAttributeEntityTypeFromAttribute(
+                    attributeValues={getAttributeValuesFromReferences(
                       assignReferencesAttributeId,
                       data.attributes,
+                      referencePages,
+                      referenceProducts,
                     )}
-                    confirmButtonState={"default"}
-                    products={referenceProducts}
-                    pages={referencePages}
                     hasMore={handlers.fetchMoreReferences?.hasMore}
                     open={canOpenAssignReferencesAttributeDialog}
                     onFetch={handlers.fetchReferences}

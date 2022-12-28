@@ -252,7 +252,7 @@ describe("As an admin I want to update vouchers", () => {
           .should("not.exist")
           .get(VOUCHERS_SELECTORS.assignCountryButton)
           .click()
-          .assignElements("Poland")
+          .assignElements("Poland", false)
           .addAliasToGraphRequest("VoucherUpdate")
           .get(BUTTON_SELECTORS.confirm)
           .click()

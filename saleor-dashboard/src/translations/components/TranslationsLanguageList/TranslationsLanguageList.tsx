@@ -1,4 +1,10 @@
-import { Card, TableBody, TableCell, TableHead } from "@material-ui/core";
+import {
+  Card,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
 import Skeleton from "@saleor/components/Skeleton";
 import TableRowLink from "@saleor/components/TableRowLink";
@@ -35,11 +41,11 @@ const TranslationsLanguageList: React.FC<TranslationsLanguageListProps> = props 
     <Card>
       <ResponsiveTable>
         <TableHead>
-          <TableRowLink>
+          <TableRow>
             <TableCell>
               <FormattedMessage id="y1Z3or" defaultMessage="Language" />
             </TableCell>
-          </TableRowLink>
+          </TableRow>
         </TableHead>
         <TableBody>
           {renderCollection(
@@ -61,14 +67,14 @@ const TranslationsLanguageList: React.FC<TranslationsLanguageListProps> = props 
               </TableRowLink>
             ),
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={1}>
                   <FormattedMessage
                     id="ptPPVk"
                     defaultMessage="No languages found"
                   />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </TableBody>

@@ -7,6 +7,7 @@ import {
   DialogTitle,
   TableBody,
   TableCell,
+  TableRow,
   TextField,
 } from "@material-ui/core";
 import BackButton from "@saleor/components/BackButton";
@@ -15,7 +16,6 @@ import ConfirmButton from "@saleor/components/ConfirmButton";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
 import Skeleton from "@saleor/components/Skeleton";
 import TableCellAvatar from "@saleor/components/TableCellAvatar";
-import TableRowLink from "@saleor/components/TableRowLink";
 import {
   SearchProductsQuery,
   ShippingPriceExcludeProductMutation,
@@ -184,7 +184,7 @@ const ShippingMethodProductsAddDialog: React.FC<ShippingMethodProductsAddDialogP
                       <React.Fragment
                         key={product ? product.id : `skeleton-${productIndex}`}
                       >
-                        <TableRowLink>
+                        <TableRow>
                           <TableCell
                             padding="checkbox"
                             className={classes.productCheckboxCell}
@@ -211,19 +211,19 @@ const ShippingMethodProductsAddDialog: React.FC<ShippingMethodProductsAddDialogP
                           <TableCell className={classes.colName} colSpan={2}>
                             {product?.name || <Skeleton />}
                           </TableCell>
-                        </TableRowLink>
+                        </TableRow>
                       </React.Fragment>
                     );
                   },
                   () => (
-                    <TableRowLink>
+                    <TableRow>
                       <TableCell colSpan={4}>
                         <FormattedMessage
                           id="5ZvuVw"
                           defaultMessage="No products matching given query"
                         />
                       </TableCell>
-                    </TableRowLink>
+                    </TableRow>
                   ),
                 )}
               </TableBody>

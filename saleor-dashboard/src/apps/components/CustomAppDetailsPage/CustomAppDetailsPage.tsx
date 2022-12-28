@@ -36,14 +36,14 @@ export interface CustomAppDetailsPageFormData {
   permissions: PermissionEnum[];
 }
 export interface CustomAppDetailsPageProps {
-  apiUrl: string;
+  apiUri: string;
   disabled: boolean;
   errors: AppErrorFragment[];
   permissions: ShopInfoQuery["shop"]["permissions"];
   saveButtonBarState: ConfirmButtonTransitionState;
   app: AppUpdateMutation["appUpdate"]["app"];
   token: string;
-  onApiUrlClick: () => void;
+  onApiUriClick: () => void;
   onTokenDelete: (id: string) => void;
   onTokenClose: () => void;
   onTokenCreate: () => void;
@@ -58,14 +58,14 @@ export interface CustomAppDetailsPageProps {
 
 const CustomAppDetailsPage: React.FC<CustomAppDetailsPageProps> = props => {
   const {
-    apiUrl,
+    apiUri,
     disabled,
     errors,
     permissions,
     saveButtonBarState,
     app,
     token,
-    onApiUrlClick,
+    onApiUriClick,
     onTokenClose,
     onTokenCreate,
     onTokenDelete,
@@ -136,9 +136,9 @@ const CustomAppDetailsPage: React.FC<CustomAppDetailsPageProps> = props => {
               {token && (
                 <>
                   <CustomAppDefaultToken
-                    apiUrl={apiUrl}
+                    apiUri={apiUri}
                     token={token}
-                    onApiUrlClick={onApiUrlClick}
+                    onApiUriClick={onApiUriClick}
                     onTokenClose={onTokenClose}
                   />
                   <CardSpacer />

@@ -58,7 +58,7 @@ describe("Tests for page types", () => {
           .should("be.not.visible")
           .get(PAGE_TYPE_DETAILS.assignAttributesButton)
           .click()
-          .assignElements(randomName)
+          .assignElements(randomName, false)
           .confirmationMessageShouldDisappear();
         getPageType(pageType.id);
       })

@@ -1,5 +1,5 @@
 import {
-  getReferenceAttributeEntityTypeFromAttribute,
+  getAttributeValuesFromReferences,
   mergeAttributeValues,
 } from "@saleor/attributes/utils/data";
 import CannotDefineChannelsAvailabilityCard from "@saleor/channels/components/CannotDefineChannelsAvailabilityCard/CannotDefineChannelsAvailabilityCard";
@@ -379,13 +379,12 @@ export const ProductCreatePage: React.FC<ProductCreatePageProps> = ({
             />
             {canOpenAssignReferencesAttributeDialog && (
               <AssignAttributeValueDialog
-                entityType={getReferenceAttributeEntityTypeFromAttribute(
+                attributeValues={getAttributeValuesFromReferences(
                   assignReferencesAttributeId,
                   data.attributes,
+                  referencePages,
+                  referenceProducts,
                 )}
-                confirmButtonState={"default"}
-                products={referenceProducts}
-                pages={referencePages}
                 hasMore={handlers.fetchMoreReferences?.hasMore}
                 open={canOpenAssignReferencesAttributeDialog}
                 onFetch={handlers.fetchReferences}

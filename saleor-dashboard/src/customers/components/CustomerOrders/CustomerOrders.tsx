@@ -1,4 +1,10 @@
-import { Card, TableBody, TableCell, TableHead } from "@material-ui/core";
+import {
+  Card,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import { Button } from "@saleor/components/Button";
 import CardTitle from "@saleor/components/CardTitle";
 import { DateTime } from "@saleor/components/Date";
@@ -64,7 +70,7 @@ const CustomerOrders: React.FC<CustomerOrdersProps> = props => {
       />
       <ResponsiveTable>
         <TableHead>
-          <TableRowLink>
+          <TableRow>
             <TableCell>
               <FormattedMessage
                 id="nTF6tG"
@@ -93,7 +99,7 @@ const CustomerOrders: React.FC<CustomerOrdersProps> = props => {
                 description="order total amount"
               />
             </TableCell>
-          </TableRowLink>
+          </TableRow>
         </TableHead>
         <TableBody>
           {renderCollection(
@@ -141,14 +147,14 @@ const CustomerOrders: React.FC<CustomerOrdersProps> = props => {
               </TableRowLink>
             ),
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={6}>
                   <FormattedMessage
                     id="RlfqSV"
                     defaultMessage="No orders found"
                   />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </TableBody>

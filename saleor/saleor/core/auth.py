@@ -1,14 +1,14 @@
 from typing import Optional
 
-from django.http import HttpRequest
+from django.core.handlers.wsgi import WSGIRequest
 
 SALEOR_AUTH_HEADER = "HTTP_AUTHORIZATION_BEARER"
 DEFAULT_AUTH_HEADER = "HTTP_AUTHORIZATION"
 AUTH_HEADER_PREFIXES = ["JWT", "BEARER"]
 
 
-def get_token_from_request(request: HttpRequest) -> Optional[str]:
-    auth_token: Optional[str] = request.META.get(SALEOR_AUTH_HEADER)
+def get_token_from_request(request: WSGIRequest) -> Optional[str]:
+    auth_token = request.META.get(SALEOR_AUTH_HEADER)
 
     if not auth_token:
         auth = request.META.get(DEFAULT_AUTH_HEADER, "").split(maxsplit=1)

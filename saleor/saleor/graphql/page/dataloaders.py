@@ -54,11 +54,7 @@ class PageAttributesByPageTypeIdLoader(DataLoader):
 
     def batch_load(self, keys):
         requestor = get_user_or_app_from_context(self.context)
-        if (
-            requestor
-            and requestor.is_active
-            and requestor.has_perm(PagePermissions.MANAGE_PAGES)
-        ):
+        if requestor.is_active and requestor.has_perm(PagePermissions.MANAGE_PAGES):
             qs = AttributePage.objects.using(self.database_connection_name).all()
         else:
             qs = AttributePage.objects.using(self.database_connection_name).filter(
@@ -97,11 +93,7 @@ class AttributePagesByPageTypeIdLoader(DataLoader):
 
     def batch_load(self, keys):
         requestor = get_user_or_app_from_context(self.context)
-        if (
-            requestor
-            and requestor.is_active
-            and requestor.has_perm(PagePermissions.MANAGE_PAGES)
-        ):
+        if requestor.is_active and requestor.has_perm(PagePermissions.MANAGE_PAGES):
             qs = AttributePage.objects.using(self.database_connection_name).all()
         else:
             qs = AttributePage.objects.using(self.database_connection_name).filter(
@@ -121,11 +113,7 @@ class AssignedPageAttributesByPageIdLoader(DataLoader):
 
     def batch_load(self, keys):
         requestor = get_user_or_app_from_context(self.context)
-        if (
-            requestor
-            and requestor.is_active
-            and requestor.has_perm(PagePermissions.MANAGE_PAGES)
-        ):
+        if requestor.is_active and requestor.has_perm(PagePermissions.MANAGE_PAGES):
             qs = AssignedPageAttribute.objects.using(
                 self.database_connection_name
             ).all()

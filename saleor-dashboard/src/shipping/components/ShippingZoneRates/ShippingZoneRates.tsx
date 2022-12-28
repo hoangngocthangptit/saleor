@@ -1,4 +1,10 @@
-import { Card, TableBody, TableCell, TableHead } from "@material-ui/core";
+import {
+  Card,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import CardTitle from "@saleor/components/CardTitle";
 import IconButtonTableCell from "@saleor/components/IconButtonTableCell";
@@ -96,7 +102,7 @@ const ShippingZoneRates: React.FC<ShippingZoneRatesProps> = props => {
       />
       <ResponsiveTable>
         <TableHead>
-          <TableRowLink>
+          <TableRow>
             <TableCell className={classes.nameColumn}>
               <FormattedMessage
                 id="aPCrsp"
@@ -126,7 +132,7 @@ const ShippingZoneRates: React.FC<ShippingZoneRatesProps> = props => {
             </TableCell>
             <TableCell className={classes.buttonColumn} />
             <TableCell className={classes.buttonColumn} />
-          </TableRowLink>
+          </TableRow>
         </TableHead>
         <TableBody>
           {renderCollection(
@@ -196,14 +202,14 @@ const ShippingZoneRates: React.FC<ShippingZoneRatesProps> = props => {
               );
             },
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={5}>
                   <FormattedMessage
                     id="RUzdUH"
                     defaultMessage="No shipping rates found"
                   />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </TableBody>

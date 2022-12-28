@@ -1,10 +1,9 @@
-from urllib.parse import unquote, urlparse
+from urllib.parse import urljoin
 
 import graphene
-from django.core.files.storage import default_storage
+from django.conf import settings
 
 from ....core.tracing import traced_resolver
-from ....core.utils import build_absolute_uri
 from ...account.enums import AddressTypeEnum
 from ..descriptions import ADDED_IN_36, PREVIEW_FEATURE
 from ..enums import (
@@ -423,10 +422,9 @@ class Image(graphene.ObjectType):
     class Meta:
         description = "Represents an image."
 
+    @staticmethod
     def resolve_url(root, info):
-        if urlparse(root.url).netloc:
-            return root.url
-        return build_absolute_uri(root.url)
+        return info.context.build_absolute_uri(urljoin(settings.MEDIA_URL, root.url))
 
 
 class File(graphene.ObjectType):
@@ -437,11 +435,7 @@ class File(graphene.ObjectType):
 
     @staticmethod
     def resolve_url(root, info):
-        # check if URL is absolute:
-        if urlparse(root.url).netloc:
-            return root.url
-        # unquote used for preventing double URL encoding
-        return build_absolute_uri(default_storage.url(unquote(root.url)))
+        return info.context.build_absolute_uri(urljoin(settings.MEDIA_URL, root.url))
 
 
 class PriceInput(graphene.InputObjectType):

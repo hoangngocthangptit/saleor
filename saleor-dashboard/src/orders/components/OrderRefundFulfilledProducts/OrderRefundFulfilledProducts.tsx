@@ -5,6 +5,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@material-ui/core";
@@ -13,7 +14,6 @@ import CardTitle from "@saleor/components/CardTitle";
 import Money from "@saleor/components/Money";
 import Skeleton from "@saleor/components/Skeleton";
 import TableCellAvatar from "@saleor/components/TableCellAvatar";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { OrderRefundDataQuery } from "@saleor/graphql";
 import { FormsetChange } from "@saleor/hooks/useFormset";
 import { makeStyles } from "@saleor/macaw-ui";
@@ -119,7 +119,7 @@ const OrderRefundFulfilledProducts: React.FC<OrderRefundFulfilledProductsProps> 
       </CardContent>
       <Table>
         <TableHead>
-          <TableRowLink>
+          <TableRow>
             <TableCell>
               <FormattedMessage
                 id="FNT4b+"
@@ -148,7 +148,7 @@ const OrderRefundFulfilledProducts: React.FC<OrderRefundFulfilledProductsProps> 
                 description="tabel column header"
               />
             </TableCell>
-          </TableRowLink>
+          </TableRow>
         </TableHead>
         <TableBody>
           {renderCollection(
@@ -162,7 +162,7 @@ const OrderRefundFulfilledProducts: React.FC<OrderRefundFulfilledProductsProps> 
                 Number(selectedLineQuantity?.value) < 0;
 
               return (
-                <TableRowLink key={line?.id}>
+                <TableRow key={line?.id}>
                   <TableCellAvatar thumbnail={line?.orderLine?.thumbnail?.url}>
                     {line?.orderLine?.productName ? (
                       line?.orderLine?.productName
@@ -230,18 +230,18 @@ const OrderRefundFulfilledProducts: React.FC<OrderRefundFulfilledProductsProps> 
                       />
                     )) || <Skeleton />}
                   </TableCell>
-                </TableRowLink>
+                </TableRow>
               );
             },
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={4}>
                   <FormattedMessage
                     id="Q1Uzbb"
                     defaultMessage="No products found"
                   />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </TableBody>

@@ -7,6 +7,7 @@ import {
   DialogTitle,
   TableBody,
   TableCell,
+  TableRow,
   TextField,
   Typography,
 } from "@material-ui/core";
@@ -16,7 +17,6 @@ import ConfirmButton from "@saleor/components/ConfirmButton";
 import FormSpacer from "@saleor/components/FormSpacer";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
 import TableCellAvatar from "@saleor/components/TableCellAvatar";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { OrderErrorFragment, SearchOrderVariantQuery } from "@saleor/graphql";
 import useModalDialogErrors from "@saleor/hooks/useModalDialogErrors";
 import useModalDialogOpen from "@saleor/hooks/useModalDialogOpen";
@@ -158,7 +158,7 @@ const OrderProductAddDialog: React.FC<OrderProductAddDialogProps> = props => {
                 productChoicesWithValidVariants,
                 (product, productIndex) => (
                   <React.Fragment key={product ? product.id : "skeleton"}>
-                    <TableRowLink>
+                    <TableRow>
                       <TableCell
                         padding="checkbox"
                         className={classes.productCheckboxCell}
@@ -186,11 +186,11 @@ const OrderProductAddDialog: React.FC<OrderProductAddDialogProps> = props => {
                       <TableCell className={classes.colName} colSpan={2}>
                         {maybe(() => product.name)}
                       </TableCell>
-                    </TableRowLink>
+                    </TableRow>
                     {maybe(() => product.variants, [])
                       .filter(isValidVariant)
                       .map((variant, variantIndex) => (
-                        <TableRowLink key={variant.id}>
+                        <TableRow key={variant.id}>
                           <TableCell />
                           <TableCell className={classes.colVariantCheckbox}>
                             <Checkbox
@@ -229,7 +229,7 @@ const OrderProductAddDialog: React.FC<OrderProductAddDialogProps> = props => {
                           <TableCell className={classes.textRight}>
                             <OrderPriceLabel pricing={variant.pricing} />
                           </TableCell>
-                        </TableRowLink>
+                        </TableRow>
                       ))}
                   </React.Fragment>
                 ),

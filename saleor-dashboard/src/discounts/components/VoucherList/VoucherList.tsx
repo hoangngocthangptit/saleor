@@ -1,4 +1,4 @@
-import { TableBody, TableCell, TableFooter } from "@material-ui/core";
+import { TableBody, TableCell, TableFooter, TableRow } from "@material-ui/core";
 import Checkbox from "@saleor/components/Checkbox";
 import Date from "@saleor/components/Date";
 import Money from "@saleor/components/Money";
@@ -224,13 +224,13 @@ const VoucherList: React.FC<VoucherListProps> = props => {
         </TableCellHeader>
       </TableHead>
       <TableFooter>
-        <TableRowLink>
+        <TableRow>
           <TablePaginationWithContext
             colSpan={numberOfColumns}
             settings={settings}
             onUpdateListSettings={onUpdateListSettings}
           />
-        </TableRowLink>
+        </TableRow>
       </TableFooter>
       <TableBody>
         {renderCollection(
@@ -324,14 +324,14 @@ const VoucherList: React.FC<VoucherListProps> = props => {
             );
           },
           () => (
-            <TableRowLink>
+            <TableRow>
               <TableCell colSpan={numberOfColumns}>
                 <FormattedMessage
                   id="U2mOqA"
                   defaultMessage="No vouchers found"
                 />
               </TableCell>
-            </TableRowLink>
+            </TableRow>
           ),
         )}
       </TableBody>

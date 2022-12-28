@@ -3,7 +3,6 @@ import { BatchHttpLink } from "@apollo/client/link/batch-http";
 import NodeHttpAdapter from "@pollyjs/adapter-node-http";
 import { Polly } from "@pollyjs/core";
 import FSPersister from "@pollyjs/persister-fs";
-import { getApiUrl } from "@saleor/config";
 import { createFetch } from "@saleor/sdk";
 import path from "path";
 import { setupPolly } from "setup-polly-jest";
@@ -37,7 +36,7 @@ function setupApi() {
   const cache = new InMemoryCache();
   const link = new BatchHttpLink({
     fetch: createFetch(),
-    uri: getApiUrl(),
+    uri: process.env.API_URI || "http://localhost:8000/graphql/",
   });
   const apolloClient = new ApolloClient({
     cache,

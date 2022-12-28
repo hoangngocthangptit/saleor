@@ -92,10 +92,10 @@ const SingleAutocompleteSelectFieldComponent: React.FC<SingleAutocompleteSelectF
 
   return (
     <DebounceAutocomplete debounceFn={fetchChoices}>
-      {fetchChoicesDebounced => (
+      {debounceFn => (
         <Downshift
           itemToString={() => displayValue || ""}
-          onInputValueChange={value => fetchChoicesDebounced(value)}
+          onInputValueChange={value => debounceFn(value)}
           onSelect={handleChange}
           selectedItem={value || ""}
           // this is to prevent unwanted state updates when the dropdown is closed with an empty value,
@@ -213,11 +213,7 @@ const SingleAutocompleteSelectFieldComponent: React.FC<SingleAutocompleteSelectF
 
             return (
               <div
-                className={classNames(
-                  classes.container,
-                  "click-outside-ignore",
-                  className,
-                )}
+                className={classNames(classes.container, className)}
                 {...rest}
               >
                 <TextFieldComponent

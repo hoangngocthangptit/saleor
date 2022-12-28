@@ -12,9 +12,9 @@ type ShopContext = ShopInfoQuery["shop"];
 export const ShopContext = React.createContext<ShopContext>(undefined);
 
 export const ShopProvider: React.FC = ({ children }) => {
-  const { authenticated, user } = useUser();
+  const { authenticated } = useUser();
   const { data } = useShopInfoQuery({
-    skip: !authenticated || !user,
+    skip: !authenticated,
   });
 
   return (

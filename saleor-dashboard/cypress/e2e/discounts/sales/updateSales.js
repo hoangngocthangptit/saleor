@@ -7,7 +7,10 @@ import { SALES_SELECTORS } from "../../../elements/discounts/sales";
 import { BUTTON_SELECTORS } from "../../../elements/shared/button-selectors";
 import { SHARED_ELEMENTS } from "../../../elements/shared/sharedElements";
 import { saleDetailsUrl } from "../../../fixtures/urlList";
-import { updateSale } from "../../../support/api/requests/Discounts/Sales";
+import {
+  getSales,
+  updateSale,
+} from "../../../support/api/requests/Discounts/Sales";
 import { getVariant } from "../../../support/api/requests/Product";
 import { getDefaultChannel } from "../../../support/api/utils/channelsUtils";
 import {

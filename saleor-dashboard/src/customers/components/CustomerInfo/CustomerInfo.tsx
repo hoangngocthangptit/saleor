@@ -70,9 +70,6 @@ const CustomerInfo: React.FC<CustomerInfoProps> = props => {
             label={intl.formatMessage(commonMessages.firstName)}
             value={data.firstName}
             onChange={onChange}
-            inputProps={{
-              spellCheck: false,
-            }}
           />
           <TextField
             disabled={disabled}
@@ -84,9 +81,6 @@ const CustomerInfo: React.FC<CustomerInfoProps> = props => {
             label={intl.formatMessage(commonMessages.lastName)}
             value={data.lastName}
             onChange={onChange}
-            inputProps={{
-              spellCheck: false,
-            }}
           />
         </Grid>
         <Hr className={classes.hr} />
@@ -107,9 +101,6 @@ const CustomerInfo: React.FC<CustomerInfoProps> = props => {
           label={intl.formatMessage(commonMessages.email)}
           value={data.email}
           onChange={onChange}
-          inputProps={{
-            spellCheck: false,
-          }}
         />
       </CardContent>
     </Card>

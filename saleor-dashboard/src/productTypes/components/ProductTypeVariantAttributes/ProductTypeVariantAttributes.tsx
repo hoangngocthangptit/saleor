@@ -1,4 +1,4 @@
-import { Card, TableCell, Tooltip } from "@material-ui/core";
+import { Card, TableCell, TableRow, Tooltip } from "@material-ui/core";
 import HelpOutline from "@material-ui/icons/HelpOutline";
 import { attributeUrl } from "@saleor/attributes/urls";
 import { Button } from "@saleor/components/Button";
@@ -12,7 +12,6 @@ import {
 } from "@saleor/components/SortableTable";
 import { TableButtonWrapper } from "@saleor/components/TableButtonWrapper/TableButtonWrapper";
 import TableHead from "@saleor/components/TableHead";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { ProductAttributeType, ProductTypeDetailsQuery } from "@saleor/graphql";
 import { DeleteIcon, IconButton, makeStyles } from "@saleor/macaw-ui";
 import { maybe, renderCollection } from "@saleor/misc";
@@ -283,14 +282,14 @@ const ProductTypeVariantAttributes: React.FC<ProductTypeVariantAttributesProps> 
               );
             },
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={numberOfColumns}>
                   <FormattedMessage
                     id="ztQgD8"
                     defaultMessage="No attributes found"
                   />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </SortableTableBody>

@@ -5,6 +5,7 @@ import {
   DialogTitle,
   TableBody,
   TableCell,
+  TableRow,
   TextField,
   Typography,
 } from "@material-ui/core";
@@ -15,7 +16,6 @@ import Form from "@saleor/components/Form";
 import FormSpacer from "@saleor/components/FormSpacer";
 import Hr from "@saleor/components/Hr";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { CountryWithCodeFragment } from "@saleor/graphql";
 import { ConfirmButtonTransitionState } from "@saleor/macaw-ui";
 import {
@@ -127,7 +127,7 @@ const ShippingZoneCountriesAssignDialog: React.FC<ShippingZoneCountriesAssignDia
                     <FormSpacer />
                     <ResponsiveTable className={classes.table}>
                       <TableBody>
-                        <TableRowLink
+                        <TableRow
                           className={classes.clickableRow}
                           onClick={() =>
                             handleRestOfTheWorldChange(
@@ -154,7 +154,7 @@ const ShippingZoneCountriesAssignDialog: React.FC<ShippingZoneCountriesAssignDia
                               checked={isRestOfTheWorldSelected}
                             />
                           </TableCell>
-                        </TableRowLink>
+                        </TableRow>
                       </TableBody>
                     </ResponsiveTable>
                     <FormSpacer />
@@ -173,7 +173,7 @@ const ShippingZoneCountriesAssignDialog: React.FC<ShippingZoneCountriesAssignDia
                       const isChecked = countrySelectionMap[country.code];
 
                       return (
-                        <TableRowLink
+                        <TableRow
                           className={classes.clickableRow}
                           onClick={() =>
                             handleCountryChange(country.code, !isChecked)
@@ -189,7 +189,7 @@ const ShippingZoneCountriesAssignDialog: React.FC<ShippingZoneCountriesAssignDia
                           >
                             <Checkbox checked={isChecked} />
                           </TableCell>
-                        </TableRowLink>
+                        </TableRow>
                       );
                     })}
                   </TableBody>

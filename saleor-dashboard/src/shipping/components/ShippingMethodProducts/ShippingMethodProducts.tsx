@@ -3,6 +3,7 @@ import {
   TableBody,
   TableCell,
   TableFooter,
+  TableRow,
   Typography,
 } from "@material-ui/core";
 import { Button } from "@saleor/components/Button";
@@ -13,7 +14,6 @@ import Skeleton from "@saleor/components/Skeleton";
 import TableCellAvatar from "@saleor/components/TableCellAvatar";
 import TableHead from "@saleor/components/TableHead";
 import { TablePaginationWithContext } from "@saleor/components/TablePagination";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { ShippingZoneQuery } from "@saleor/graphql";
 import { DeleteIcon, IconButton, makeStyles } from "@saleor/macaw-ui";
 import { renderCollection } from "@saleor/misc";
@@ -108,27 +108,27 @@ const ShippingMethodProducts: React.FC<ShippingMethodProductsProps> = props => {
               </TableCell>
             </TableHead>
             <TableFooter>
-              <TableRowLink>
+              <TableRow>
                 <TablePaginationWithContext
                   colSpan={numberOfColumns}
                   disabled={disabled}
                 />
-              </TableRowLink>
+              </TableRow>
             </TableFooter>
           </>
         )}
         <TableBody>
           {products?.length === 0 ? (
-            <TableRowLink>
+            <TableRow>
               <TableCell colSpan={5}>
                 <FormattedMessage id="Gg4+K7" defaultMessage="No Products" />
               </TableCell>
-            </TableRowLink>
+            </TableRow>
           ) : (
             renderCollection(products, product => {
               const isSelected = product ? isChecked(product.id) : false;
               return (
-                <TableRowLink key={product ? product.id : "skeleton"}>
+                <TableRow key={product ? product.id : "skeleton"}>
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={isSelected}
@@ -155,7 +155,7 @@ const ShippingMethodProducts: React.FC<ShippingMethodProductsProps> = props => {
                       <DeleteIcon color="primary" />
                     </IconButton>
                   </TableCell>
-                </TableRowLink>
+                </TableRow>
               );
             })
           )}

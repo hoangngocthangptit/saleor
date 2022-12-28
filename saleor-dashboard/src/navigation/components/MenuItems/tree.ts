@@ -1,4 +1,4 @@
-import { RecursiveMenuItem } from "@saleor/navigation/types";
+import { MenuDetailsFragment } from "@saleor/graphql";
 import { getPatch } from "fast-array-diff";
 import { TreeItem } from "react-sortable-tree";
 
@@ -12,25 +12,14 @@ export interface TreeOperation {
   sortOrder?: number;
   simulatedMove?: boolean;
 }
-export interface TreeItemProps {
-  id: string;
-  onChange?: (operations: TreeOperation[]) => void;
-  onClick?: () => void;
-  onEdit?: () => void;
-}
-
-export type MenuTreeItem = TreeItem<TreeItemProps>;
 
 export const unknownTypeError = Error("Unknown type");
 
-function treeToMap(
-  tree: MenuTreeItem[],
-  parent: string,
-): Record<string, string[]> {
+function treeToMap(tree: TreeItem[], parent: string): Record<string, string[]> {
   const childrenList = tree.map(node => node.id);
   const childrenMaps = tree.map(node => ({
     id: node.id,
-    mappedNodes: treeToMap(node.children as MenuTreeItem[], node.id),
+    mappedNodes: treeToMap(node.children as TreeItem[], node.id),
   }));
 
   return {
@@ -45,7 +34,9 @@ function treeToMap(
   };
 }
 
-export function getItemType(item: RecursiveMenuItem): MenuItemType {
+export function getItemType(
+  item: MenuDetailsFragment["items"][0],
+): MenuItemType {
   if (item.category) {
     return "category";
   } else if (item.collection) {
@@ -59,7 +50,7 @@ export function getItemType(item: RecursiveMenuItem): MenuItemType {
   }
 }
 
-export function getItemId(item: RecursiveMenuItem): string {
+export function getItemId(item: MenuDetailsFragment["items"][0]): string {
   if (item.category) {
     return item.category.id;
   } else if (item.collection) {
@@ -74,8 +65,8 @@ export function getItemId(item: RecursiveMenuItem): string {
 }
 
 export function getDiff(
-  originalTree: MenuTreeItem[],
-  newTree: MenuTreeItem[],
+  originalTree: TreeItem[],
+  newTree: TreeItem[],
 ): TreeOperation[] {
   const originalMap = treeToMap(originalTree, "root");
   const newMap = treeToMap(newTree, "root");
@@ -136,11 +127,11 @@ export function getDiff(
 }
 
 export function getNodeData(
-  item: RecursiveMenuItem,
+  item: MenuDetailsFragment["items"][0],
   onChange: (operations: TreeOperation[]) => void,
   onClick: (id: string, type: MenuItemType) => void,
   onEdit: (id: string) => void,
-): MenuTreeItem {
+): TreeItem {
   return {
     children: item.children.map(child =>
       getNodeData(child, onChange, onClick, onEdit),
@@ -154,7 +145,7 @@ export function getNodeData(
   };
 }
 
-export function getNodeQuantity(items: RecursiveMenuItem[]): number {
+export function getNodeQuantity(items: MenuDetailsFragment["items"]): number {
   return items.reduce(
     (acc, curr) => acc + getNodeQuantity(curr.children),
     items.length,

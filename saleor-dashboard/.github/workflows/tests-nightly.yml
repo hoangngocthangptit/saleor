@@ -12,7 +12,6 @@ on:
         - '@allEnv'
         - '@critical'
         - '@stable'
-        - '@oldRelease'
       environment:
         required: true 
         description: 'Environment to run tests against'
@@ -47,8 +46,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          # use explicit version as this job does not checkout code
-          node-version: '18'
+          node-version: 16
 
       - name: Install saleor cli
         id: install-saleor-cli
@@ -73,9 +71,8 @@ jobs:
 
       - name: revert snapshot
         env:
-          CI: true
           SALEOR_CLI_ENV: staging
-        run: npx saleor backup restore 9S4PckyI --skip-webhooks-update
+        run: npx saleor backup restore 6tOoEwCh --skip-webhooks-update
 
       - name: Notify Slack
         if: ${{ failure() }}
@@ -92,19 +89,17 @@ jobs:
     needs: ['revert-automation-env-to-snap']
     if: ${{ always() && github.event_name != 'repository_dispatch'  }} #Wait for revert-automation-env-to-snap, bot run always, even if skipped
     runs-on: ubuntu-latest
-    env:
-      NODE_OPTIONS: "--max_old_space_size=4096"
     outputs:
       status: ${{ steps.cypress.outcome }}
-    container: cypress/browsers:node18.12.0-chrome106-ff106
+    container: cypress/browsers:node14.16.0-chrome89-ff86
     strategy:
       fail-fast: false
       matrix:
         # run copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        containers: [1, 2, 3, 4]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v1
 
       - name: Check if other env
         id: get-typed-env-uri
@@ -117,12 +112,11 @@ jobs:
           DEFAULT_ENV_URI: 'https://automation-dashboard.staging.saleor.cloud/'
           TYPED_ENV_URI: ''
         run: |
-           echo "::set-output name=ENV_URI::${{ steps.get-typed-env-uri.outputs.ENV_URI || github.event.inputs.environment || env.DEFAULT_ENV_URI }}"
-      
+          echo "::set-output name=ENV_URI::${{ steps.get-typed-env-uri.outputs.ENV_URI || github.event.inputs.environment || env.DEFAULT_ENV_URI }}"
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
+          node-version: 14
 
       - name: Cypress run
         id: cypress
@@ -150,52 +144,19 @@ jobs:
           record: true
           tag: ${{ steps.get-env-uri.outputs.ENV_URI }},${{ github.event.inputs.tags }}
 
-  get-environment-variables:
-    if: ${{ github.event_name == 'repository_dispatch' && (github.event.client_payload.environment == 'SANDBOX' || github.event.client_payload.environment == 'STAGING')}}
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    outputs:
-      url: ${{ steps.get-environment-variables.outputs.url }}
-      is_old_version: ${{ steps.get-environment-variables.outputs.IS_OLD_VERSION }}
-    env:
-      TOKEN: ${{ secrets.CLOUD_ACCESS_TOKEN }}
-      VERSION: ${{github.event.client_payload.version}}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          
-      - name: Install dependencies
-        run: |
-              cd .github/workflows
-              npm ci
-
-      - name: get environment variables
-        id: get-environment-variables
-        run: |
-              node .github/workflows/getEnvironmentVariables.js \
-              --version $VERSION \
-              --token "$TOKEN"
 
   run-tests-on-release:
-    if: ${{ github.event_name == 'repository_dispatch' && (github.event.client_payload.environment == 'SANDBOX' || github.event.client_payload.environment == 'STAGING')}}
-    needs: get-environment-variables
+    if: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment != 'PROD' && github.event.client_payload.environment != 'ENTERPRISE' && github.event.client_payload.project != 'DEMO'}}
     runs-on: ubuntu-latest
-    env:
-        NODE_OPTIONS: "--max_old_space_size=4096"
     outputs:
       status: ${{ steps.cypress.outcome }}
       dashboard_url: ${{ steps.cypress.outputs.dashboardUrl }}
-    container: cypress/browsers:node18.12.0-chrome106-ff106
+    container: cypress/browsers:node14.16.0-chrome89-ff86
     strategy:
       fail-fast: false
       matrix:
         # run copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        containers: [1, 2, 3, 4, 5, 6]
     steps:
 
       - name: Get branch
@@ -203,34 +164,27 @@ jobs:
         env:
           version: ${{github.event.client_payload.version}}
         run: |
-              echo "::set-output name=ref::$(echo $version | grep -ohE "[0-9]\.[0-9]+" )"
-
+              echo "::set-output name=ref::$(echo $version | grep -ohE "[0-9]\.[0-9]+" )" 
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: ${{ steps.branch.outputs.ref }}
-
-      - name: Set tag for tests
-        id: set-tag-for-tests
+      
+      - name: Get formatted version
+        id: version
         env:
-          is_old_version: ${{ needs.get-environment-variables.outputs.is_old_version }}
-          old_version_test_tag: "@oldRelease"
-          new_version_test_tag: "@stable"
+          version: ${{github.event.client_payload.version}}
         run: |
-          if [[ $is_old_version == "true" ]]; then
-              echo "TEST_TAG=$old_version_test_tag" >> $GITHUB_OUTPUT
-          else
-              echo "TEST_TAG=$new_version_test_tag" >> $GITHUB_OUTPUT
-          fi
+              echo "::set-output name=formatted_version::$(echo $version | grep -ohE "[0-9]\.[0-9]+" | sed s/\\.// )" 
               
       - name: Cypress run - automatically
         id: cypress
         continue-on-error: true
         uses: cypress-io/github-action@v4
         env:
-          API_URI: ${{ needs.get-environment-variables.outputs.url }}graphql/
+          API_URI: https://v${{ steps.version.outputs.formatted_version }}.staging.saleor.cloud/graphql/
           APP_MOUNT_URI: ${{ secrets.APP_MOUNT_URI }}
-          CYPRESS_baseUrl: ${{ needs.get-environment-variables.outputs.url }}dashboard/
+          CYPRESS_baseUrl: https://v${{ steps.version.outputs.formatted_version }}.staging.saleor.cloud/dashboard/
           CYPRESS_USER_NAME: ${{ secrets.CYPRESS_USER_NAME }}
           CYPRESS_SECOND_USER_NAME: ${{ secrets.CYPRESS_SECOND_USER_NAME }}
           CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
@@ -240,14 +194,13 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CYPRESS_mailHogUrl: ${{ secrets.CYPRESS_MAILHOG }}
-          COMMIT_INFO_MESSAGE: Triggered via release - ${{github.event.client_payload.project}} ${{github.event.client_payload.version}}, ${{github.event.client_payload.pullRequestUrl}}
-          CYPRESS_grepTags: ${{steps.set-tag-for-tests.outputs.TEST_TAG}}
+          COMMIT_INFO_MESSAGE: Critical triggered via release - ${{github.event.client_payload.project}} ${{github.event.client_payload.version}}, ${{github.event.client_payload.pullRequestUrl}}
+          CYPRESS_grepTags: '@stable'
         with:
           parallel: true
           group: 'UI - Chrome'
           record: true
-          tag: ${{github.event.client_payload.project}}, ${{github.event.client_payload.environment}}, ${{ needs.get-environment-variables.outputs.url }}
-
+          tag: ${{github.event.client_payload.project}}, ${{github.event.client_payload.environment}}, Critical, https://v${{ steps.version.outputs.formatted_version }}.staging.saleor.cloud
 
   add-review-and-merge-patch:
     if: ${{ always() && (needs.run-tests-on-release.outputs.status == 'success' || needs.run-tests-on-release.outputs.status == 'failure') }}
@@ -259,15 +212,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v1
         with:
-          node-version-file: '.nvmrc'
+          node-version: 14
 
       - name: Install dependencies
         run: |
               cd .github/workflows
               npm ci
-
       - name: Add review and merge if patch DASHBOARD
         env: 
          tests_status: ${{ needs.run-tests-on-release.outputs.status}}

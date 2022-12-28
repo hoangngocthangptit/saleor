@@ -19,7 +19,6 @@ from ..core.fields import ConnectionField, PermissionsField
 from ..core.types import ModelObjectType, NonNullList
 from ..meta.types import ObjectWithMetadata
 from ..product.dataloaders import ProductVariantByIdLoader
-from ..site.dataloaders import load_site_callback
 from .dataloaders import WarehouseByIdLoader
 from .enums import WarehouseClickAndCollectOptionEnum
 
@@ -192,9 +191,8 @@ class Stock(ModelObjectType):
         )["quantity_allocated"]
 
     @staticmethod
-    @load_site_callback
-    def resolve_quantity_reserved(root, _info, site):
-        if not is_reservation_enabled(site.settings):
+    def resolve_quantity_reserved(root, info):
+        if not is_reservation_enabled(info.context.site.settings):
             return 0
 
         return root.reservations.aggregate(

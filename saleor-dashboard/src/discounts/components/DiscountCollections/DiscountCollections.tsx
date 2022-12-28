@@ -1,4 +1,10 @@
-import { Card, TableBody, TableCell, TableFooter } from "@material-ui/core";
+import {
+  Card,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableRow,
+} from "@material-ui/core";
 import { collectionUrl } from "@saleor/collections/urls";
 import { Button } from "@saleor/components/Button";
 import CardTitle from "@saleor/components/CardTitle";
@@ -82,9 +88,9 @@ const DiscountCollections: React.FC<DiscountCollectionsProps> = props => {
           <TableCell />
         </TableHead>
         <TableFooter>
-          <TableRowLink>
+          <TableRow>
             <TablePaginationWithContext colSpan={numberOfColumns} />
-          </TableRowLink>
+          </TableRow>
         </TableFooter>
         <TableBody>
           {renderCollection(
@@ -137,11 +143,11 @@ const DiscountCollections: React.FC<DiscountCollectionsProps> = props => {
               );
             },
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={numberOfColumns}>
                   <FormattedMessage {...messages.discountCollectionsNotFound} />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </TableBody>

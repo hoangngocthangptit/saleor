@@ -7,7 +7,7 @@ export const useStyles = makeStyles(
       marginBottom: theme.spacing(),
     },
     tooltipIcon: {
-      fill: theme.palette.type === "dark" ? "#FAFAFA" : "#28234A",
+      fill: "#28234A",
       fillOpacity: 0.6,
       "&:hover": {
         fillOpacity: 1,

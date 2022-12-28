@@ -46,10 +46,7 @@ export const ChannelCreateView = ({}) => {
     },
   });
 
-  const [
-    reorderChannelWarehouses,
-    reorderChannelWarehousesOpts,
-  ] = useChannelReorderWarehousesMutation({
+  const [reorderChannelWarehouses] = useChannelReorderWarehousesMutation({
     onCompleted: data => {
       const errors = data.channelReorderWarehouses.errors;
       if (errors.length) {
@@ -176,7 +173,6 @@ export const ChannelCreateView = ({}) => {
           )}
           disabled={
             createChannelOpts.loading ||
-            reorderChannelWarehousesOpts.loading ||
             shippingZonesCountLoading ||
             warehousesCountLoading
           }

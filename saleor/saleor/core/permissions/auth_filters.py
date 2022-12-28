@@ -6,8 +6,7 @@ def is_app(context):
 
 
 def is_user(context):
-    user = context.user
-    return user and user.is_active
+    return context.user.is_active and context.user.is_authenticated
 
 
 def is_staff_user(context):

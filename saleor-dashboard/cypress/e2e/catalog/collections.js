@@ -103,7 +103,7 @@ describe("As an admin I want to manage collections.", () => {
 
   it(
     "should create published collection. TC: SALEOR_0302",
-    { tags: ["@collection", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@collection", "@allEnv", "@stable"] },
     () => {
       const collectionName = `${startsWith}${faker.datatype.number()}`;
       let collection;

@@ -2,7 +2,6 @@ import ChannelAllocationStrategy from "@saleor/channels/components/ChannelAlloca
 import ShippingZones from "@saleor/channels/components/ShippingZones";
 import Warehouses from "@saleor/channels/components/Warehouses";
 import { channelsListUrl } from "@saleor/channels/urls";
-import { validateChannelFormData } from "@saleor/channels/validation";
 import CardSpacer from "@saleor/components/CardSpacer";
 import Form from "@saleor/components/Form";
 import Grid from "@saleor/components/Grid";
@@ -42,9 +41,7 @@ import {
 } from "./handlers";
 import { ChannelShippingZones, ChannelWarehouses } from "./types";
 
-export interface ChannelDetailsPageProps<
-  TErrors extends ChannelErrorFragment[]
-> {
+export interface ChannelDetailsPageProps<TErrors> {
   channel?: ChannelDetailsFragment;
   currencyCodes?: SingleAutocompleteChoiceType[];
   disabled: boolean;
@@ -61,13 +58,13 @@ export interface ChannelDetailsPageProps<
   allWarehousesCount: number;
   countries: CountryFragment[];
   onDelete?: () => void;
-  onSubmit: (data: FormData) => SubmitPromise<TErrors>;
+  onSubmit: (data: FormData) => SubmitPromise<TErrors[]>;
   updateChannelStatus?: () => void;
   searchShippingZones: (query: string) => void;
   searchWarehouses: (query: string) => void;
 }
 
-const ChannelDetailsPage = function<TErrors extends ChannelErrorFragment[]>({
+const ChannelDetailsPage = function<TErrors>({
   channel,
   currencyCodes,
   disabled,
@@ -90,10 +87,6 @@ const ChannelDetailsPage = function<TErrors extends ChannelErrorFragment[]>({
   countries,
 }: ChannelDetailsPageProps<TErrors>) {
   const navigate = useNavigator();
-
-  const [validationErrors, setValidationErrors] = useState<
-    ChannelErrorFragment[]
-  >([]);
 
   const [selectedCurrencyCode, setSelectedCurrencyCode] = useState("");
   const [
@@ -140,21 +133,25 @@ const ChannelDetailsPage = function<TErrors extends ChannelErrorFragment[]>({
         !warehousesToDisplay.some(({ id }) => id === searchedWarehouseId),
     );
 
-  const handleSubmit = async (data: FormData) => {
-    const errors = validateChannelFormData(data);
+  const checkIfSaveIsDisabled = (data: FormData) => {
+    const isValid =
+      !!data.name &&
+      !!data.slug &&
+      !!data.currencyCode &&
+      !!data.defaultCountry &&
+      data.name.trim().length > 0;
 
-    setValidationErrors(errors);
-
-    if (errors.length) {
-      return errors;
-    }
-
-    return onSubmit(data);
+    return disabled || !isValid;
   };
 
   return (
-    <Form confirmLeave onSubmit={handleSubmit} initial={initialData}>
-      {({ change, data, submit, set, triggerChange }) => {
+    <Form
+      confirmLeave
+      onSubmit={onSubmit}
+      initial={initialData}
+      checkIfSaveIsDisabled={checkIfSaveIsDisabled}
+    >
+      {({ change, data, submit, set, isSaveDisabled, triggerChange }) => {
         const handleCurrencyCodeSelect = createSingleAutocompleteSelectHandler(
           change,
           setSelectedCurrencyCode,
@@ -191,8 +188,6 @@ const ChannelDetailsPage = function<TErrors extends ChannelErrorFragment[]>({
         );
         const reorderWarehouse = createWarehouseReorderHandler(data, set);
 
-        const allErrors = [...errors, ...validationErrors];
-
         return (
           <>
             <Grid>
@@ -207,7 +202,7 @@ const ChannelDetailsPage = function<TErrors extends ChannelErrorFragment[]>({
                   onChange={change}
                   onCurrencyCodeChange={handleCurrencyCodeSelect}
                   onDefaultCountryChange={handleDefaultCountrySelect}
-                  errors={allErrors}
+                  errors={errors}
                 />
               </div>
               <div>
@@ -272,7 +267,7 @@ const ChannelDetailsPage = function<TErrors extends ChannelErrorFragment[]>({
               onSubmit={submit}
               onDelete={onDelete}
               state={saveButtonBarState}
-              disabled={disabled}
+              disabled={isSaveDisabled}
             />
           </>
         );

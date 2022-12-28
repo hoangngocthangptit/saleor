@@ -77,7 +77,6 @@ const LoginCard: React.FC<LoginCardProps> = props => {
             value={data.email}
             inputProps={{
               "data-test-id": "email",
-              spellCheck: false,
             }}
             disabled={disabled}
           />
@@ -96,7 +95,6 @@ const LoginCard: React.FC<LoginCardProps> = props => {
               value={data.password}
               inputProps={{
                 "data-test-id": "password",
-                spellCheck: false,
               }}
               disabled={disabled}
             />

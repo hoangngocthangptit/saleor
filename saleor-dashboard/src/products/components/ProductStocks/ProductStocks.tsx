@@ -10,6 +10,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@material-ui/core";
@@ -24,7 +25,6 @@ import FormSpacer from "@saleor/components/FormSpacer";
 import Hr from "@saleor/components/Hr";
 import Link from "@saleor/components/Link";
 import PreviewPill from "@saleor/components/PreviewPill";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { ProductErrorFragment, WarehouseFragment } from "@saleor/graphql";
 import { FormChange, FormErrors } from "@saleor/hooks/useForm";
 import { FormsetAtomicData, FormsetChange } from "@saleor/hooks/useFormset";
@@ -37,6 +37,7 @@ import React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import { ProductCreateData } from "../ProductCreatePage";
+import { ProductUpdateSubmitData } from "../ProductUpdatePage/form";
 import { ProductVariantCreateData } from "../ProductVariantCreatePage/form";
 import { ProductVariantUpdateData } from "../ProductVariantPage/form";
 import { messages } from "./messages";
@@ -67,6 +68,7 @@ export interface ProductStocksProps {
   formErrors:
     | FormErrors<ProductVariantCreateData>
     | FormErrors<ProductVariantUpdateData>
+    | FormErrors<ProductUpdateSubmitData>
     | FormErrors<ProductCreateData>;
   hasVariants: boolean;
   stocks: ProductStockInput[];
@@ -245,7 +247,7 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
               <col className={classes.colQuantity} />
             </colgroup>
             <TableHead>
-              <TableRowLink>
+              <TableRow>
                 <TableCell className={classes.colName}>
                   <FormattedMessage {...messages.warehouseName} />
                 </TableCell>
@@ -256,7 +258,7 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
                   <FormattedMessage {...messages.quantity} />
                 </TableCell>
                 <TableCell className={classes.colAction} />
-              </TableRowLink>
+              </TableRow>
             </TableHead>
             <TableBody>
               {renderCollection(stocks, (stock, index) => {
@@ -265,7 +267,7 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
                 );
 
                 return (
-                  <TableRowLink key={stock.id}>
+                  <TableRow key={stock.id}>
                     <TableCell className={classes.colName}>
                       {stock.label}
                     </TableCell>
@@ -299,12 +301,12 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>
-                  </TableRowLink>
+                  </TableRow>
                 );
               })}
               {warehousesToAssign.length > 0 && (
                 <ClickAwayListener onClickAway={() => setExpansionState(false)}>
-                  <TableRowLink
+                  <TableRow
                     className={classes.addRow}
                     onClick={() => setExpansionState(!isExpanded)}
                   >
@@ -354,7 +356,7 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
                         </Popper>
                       </div>
                     </TableCell>
-                  </TableRowLink>
+                  </TableRow>
                 </ClickAwayListener>
               )}
             </TableBody>
@@ -446,7 +448,7 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
             <col className={classes.colThreshold} />
           </colgroup>
           <TableHead>
-            <TableRowLink>
+            <TableRow>
               <TableCell className={classes.colName}>
                 <FormattedMessage {...sectionNames.channels} />
               </TableCell>
@@ -456,7 +458,7 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
               <TableCell className={classes.colThreshold}>
                 <FormattedMessage {...messages.channelTreshold} />
               </TableCell>
-            </TableRowLink>
+            </TableRow>
           </TableHead>
           <TableBody>
             {renderCollection(productVariantChannelListings, listing => {
@@ -465,7 +467,7 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
               }
 
               return (
-                <TableRowLink key={listing.id}>
+                <TableRow key={listing.id}>
                   <TableCell className={classes.colName}>
                     {listing.name}
                   </TableCell>
@@ -498,7 +500,7 @@ const ProductStocks: React.FC<ProductStocksProps> = ({
                       value={listing?.preorderThreshold ?? ""}
                     />
                   </TableCell>
-                </TableRowLink>
+                </TableRow>
               );
             })}
           </TableBody>

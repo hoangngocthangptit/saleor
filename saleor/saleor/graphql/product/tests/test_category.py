@@ -13,7 +13,8 @@ from graphql_relay import to_global_id
 from ....core.utils.json_serializer import CustomJsonEncoder
 from ....product.error_codes import ProductErrorCode
 from ....product.models import Category, Product, ProductChannelListing
-from ....product.tests.utils import create_image, create_zip_file_with_image_ext
+from ....product.tests.utils import create_image, create_pdf_file_with_image_ext
+from ....tests.consts import TEST_SERVER_DOMAIN
 from ....tests.utils import dummy_editorjs
 from ....thumbnail.models import Thumbnail
 from ....webhook.event_types import WebhookEventAsyncType
@@ -354,8 +355,7 @@ CATEGORY_CREATE_MUTATION = """
         mutation(
                 $name: String, $slug: String,
                 $description: JSONString, $backgroundImage: Upload,
-                $backgroundImageAlt: String, $parentId: ID,
-                $metadata: [MetadataInput!], $privateMetadata: [MetadataInput!]) {
+                $backgroundImageAlt: String, $parentId: ID) {
             categoryCreate(
                 input: {
                     name: $name
@@ -363,8 +363,6 @@ CATEGORY_CREATE_MUTATION = """
                     description: $description
                     backgroundImage: $backgroundImage
                     backgroundImageAlt: $backgroundImageAlt
-                    metadata: $metadata
-                    privateMetadata: $privateMetadata
                 },
                 parent: $parentId
             ) {
@@ -380,14 +378,6 @@ CATEGORY_CREATE_MUTATION = """
                     backgroundImage{
                         alt
                     }
-                    metadata {
-                        key
-                        value
-                    }
-                    privateMetadata {
-                        key
-                        value
-                    }
                 }
                 errors {
                     field
@@ -402,16 +392,14 @@ CATEGORY_CREATE_MUTATION = """
 def test_category_create_mutation(
     monkeypatch, staff_api_client, permission_manage_products, media_root
 ):
-    # given
+    query = CATEGORY_CREATE_MUTATION
+
     category_name = "Test category"
     description = "description"
     category_slug = slugify(category_name)
     category_description = dummy_editorjs(description, True)
     image_file, image_name = create_image()
     image_alt = "Alt text for an image."
-
-    metadata_key = "md key"
-    metadata_value = "md value"
 
     # test creating root category
     variables = {
@@ -420,19 +408,13 @@ def test_category_create_mutation(
         "backgroundImage": image_name,
         "backgroundImageAlt": image_alt,
         "slug": category_slug,
-        "metadata": [{"key": metadata_key, "value": metadata_value}],
-        "privateMetadata": [{"key": metadata_key, "value": metadata_value}],
     }
-    body = get_multipart_request_body(
-        CATEGORY_CREATE_MUTATION, variables, image_file, image_name
-    )
+    body = get_multipart_request_body(query, variables, image_file, image_name)
     response = staff_api_client.post_multipart(
         body, permissions=[permission_manage_products]
     )
     content = get_graphql_content(response)
     data = content["data"]["categoryCreate"]
-
-    # then
     assert data["errors"] == []
     assert data["category"]["name"] == category_name
     assert data["category"]["description"] == category_description
@@ -446,8 +428,6 @@ def test_category_create_mutation(
     assert file_name.startswith(f"category-backgrounds/{img_name}")
     assert file_name.endswith(format)
     assert data["category"]["backgroundImage"]["alt"] == image_alt
-    assert category.metadata == {metadata_key: metadata_value}
-    assert category.private_metadata == {metadata_key: metadata_value}
 
     # test creating subcategory
     parent_id = data["category"]["id"]
@@ -457,7 +437,7 @@ def test_category_create_mutation(
         "parentId": parent_id,
         "slug": f"{category_slug}-2",
     }
-    response = staff_api_client.post_graphql(CATEGORY_CREATE_MUTATION, variables)
+    response = staff_api_client.post_graphql(query, variables)
     content = get_graphql_content(response)
     data = content["data"]["categoryCreate"]
     assert data["errors"] == []
@@ -590,8 +570,7 @@ def test_category_create_mutation_without_background_image(
 MUTATION_CATEGORY_UPDATE_MUTATION = """
     mutation($id: ID!, $name: String, $slug: String,
             $backgroundImage: Upload, $backgroundImageAlt: String,
-            $description: JSONString,
-            $metadata: [MetadataInput!], $privateMetadata: [MetadataInput!]) {
+            $description: JSONString) {
 
         categoryUpdate(
             id: $id
@@ -601,8 +580,6 @@ MUTATION_CATEGORY_UPDATE_MUTATION = """
                 backgroundImage: $backgroundImage
                 backgroundImageAlt: $backgroundImageAlt
                 slug: $slug
-                metadata: $metadata
-                privateMetadata: $privateMetadata
             }
         ) {
             category {
@@ -629,8 +606,6 @@ MUTATION_CATEGORY_UPDATE_MUTATION = """
 def test_category_update_mutation(
     monkeypatch, staff_api_client, category, permission_manage_products, media_root
 ):
-    # given
-
     # create child category and test that the update mutation won't change
     # it's parent
     child_category = category.children.create(name="child")
@@ -643,14 +618,6 @@ def test_category_update_mutation(
     image_file, image_name = create_image()
     image_alt = "Alt text for an image."
 
-    old_meta = {"old": "meta"}
-    child_category.store_value_in_metadata(items=old_meta)
-    child_category.store_value_in_private_metadata(items=old_meta)
-    child_category.save(update_fields=["metadata", "private_metadata"])
-
-    metadata_key = "md key"
-    metadata_value = "md value"
-
     category_id = graphene.Node.to_global_id("Category", child_category.pk)
     variables = {
         "name": category_name,
@@ -659,21 +626,15 @@ def test_category_update_mutation(
         "backgroundImageAlt": image_alt,
         "id": category_id,
         "slug": category_slug,
-        "metadata": [{"key": metadata_key, "value": metadata_value}],
-        "privateMetadata": [{"key": metadata_key, "value": metadata_value}],
     }
     body = get_multipart_request_body(
         MUTATION_CATEGORY_UPDATE_MUTATION, variables, image_file, image_name
     )
-
-    # when
     response = staff_api_client.post_multipart(
         body, permissions=[permission_manage_products]
     )
     content = get_graphql_content(response)
     data = content["data"]["categoryUpdate"]
-
-    # then
     assert data["errors"] == []
     assert data["category"]["id"] == category_id
     assert data["category"]["name"] == category_name
@@ -685,8 +646,6 @@ def test_category_update_mutation(
     assert category.description_plaintext == description
     assert category.background_image.file
     assert data["category"]["backgroundImage"]["alt"] == image_alt
-    assert category.metadata == {metadata_key: metadata_value, **old_meta}
-    assert category.private_metadata == {metadata_key: metadata_value, **old_meta}
 
 
 @freeze_time("2022-05-12 12:00:00")
@@ -759,7 +718,6 @@ def test_category_update_background_image_mutation(
     category,
     permission_manage_products,
     media_root,
-    site_settings,
 ):
     # given
     alt_text = "Alt text for an image."
@@ -810,7 +768,7 @@ def test_category_update_background_image_mutation(
     assert category.background_image.file
     assert data["category"]["backgroundImage"]["alt"] == image_alt
     assert data["category"]["backgroundImage"]["url"].startswith(
-        f"http://{site_settings.site.domain}/media/category-backgrounds/{image_name}"
+        f"http://{TEST_SERVER_DOMAIN}/media/category-backgrounds/{image_name}"
     )
 
     # ensure that thumbnails for old background image has been deleted
@@ -827,7 +785,7 @@ def test_category_update_mutation_invalid_background_image(
     media_root,
 ):
     # given
-    image_file, image_name = create_zip_file_with_image_ext()
+    image_file, image_name = create_pdf_file_with_image_ext()
     image_alt = "Alt text for an image."
     size = 128
     thumbnail_mock = MagicMock(spec=File)
@@ -1322,7 +1280,7 @@ FETCH_CATEGORY_QUERY = """
 
 
 def test_category_image_query_with_size_and_format_proxy_url_returned(
-    user_api_client, non_default_category, media_root, site_settings
+    user_api_client, non_default_category, media_root
 ):
     # given
     alt_text = "Alt text for an image."
@@ -1350,15 +1308,14 @@ def test_category_image_query_with_size_and_format_proxy_url_returned(
 
     data = content["data"]["category"]
     assert data["backgroundImage"]["alt"] == alt_text
-    domain = site_settings.site.domain
     assert (
         data["backgroundImage"]["url"]
-        == f"http://{domain}/thumbnail/{category_id}/128/{format.lower()}/"
+        == f"http://{TEST_SERVER_DOMAIN}/thumbnail/{category_id}/128/{format.lower()}/"
     )
 
 
 def test_category_image_query_with_size_proxy_url_returned(
-    user_api_client, non_default_category, media_root, site_settings
+    user_api_client, non_default_category, media_root
 ):
     # given
     alt_text = "Alt text for an image."
@@ -1386,12 +1343,12 @@ def test_category_image_query_with_size_proxy_url_returned(
     assert data["backgroundImage"]["alt"] == alt_text
     assert (
         data["backgroundImage"]["url"]
-        == f"http://{site_settings.site.domain}/thumbnail/{category_id}/{size}/"
+        == f"http://{TEST_SERVER_DOMAIN}/thumbnail/{category_id}/{size}/"
     )
 
 
 def test_category_image_query_with_size_thumbnail_url_returned(
-    user_api_client, non_default_category, media_root, site_settings
+    user_api_client, non_default_category, media_root
 ):
     # given
     alt_text = "Alt text for an image."
@@ -1423,12 +1380,12 @@ def test_category_image_query_with_size_thumbnail_url_returned(
     assert data["backgroundImage"]["alt"] == alt_text
     assert (
         data["backgroundImage"]["url"]
-        == f"http://{site_settings.site.domain}/media/thumbnails/{thumbnail_mock.name}"
+        == f"http://{TEST_SERVER_DOMAIN}/media/thumbnails/{thumbnail_mock.name}"
     )
 
 
 def test_category_image_query_only_format_provided_original_image_returned(
-    user_api_client, non_default_category, media_root, site_settings
+    user_api_client, non_default_category, media_root
 ):
     # given
     alt_text = "Alt text for an image."
@@ -1455,13 +1412,14 @@ def test_category_image_query_only_format_provided_original_image_returned(
 
     data = content["data"]["category"]
     assert data["backgroundImage"]["alt"] == alt_text
-    domain = site_settings.site.domain
-    expected_url = f"http://{domain}/media/category-backgrounds/{background_mock.name}"
+    expected_url = (
+        f"http://{TEST_SERVER_DOMAIN}/media/category-backgrounds/{background_mock.name}"
+    )
     assert data["backgroundImage"]["url"] == expected_url
 
 
 def test_category_image_query_no_size_value_original_image_returned(
-    user_api_client, non_default_category, media_root, site_settings
+    user_api_client, non_default_category, media_root
 ):
     # given
     alt_text = "Alt text for an image."
@@ -1485,8 +1443,9 @@ def test_category_image_query_no_size_value_original_image_returned(
 
     data = content["data"]["category"]
     assert data["backgroundImage"]["alt"] == alt_text
-    domain = site_settings.site.domain
-    expected_url = f"http://{domain}/media/category-backgrounds/{background_mock.name}"
+    expected_url = (
+        f"http://{TEST_SERVER_DOMAIN}/media/category-backgrounds/{background_mock.name}"
+    )
     assert data["backgroundImage"]["url"] == expected_url
 
 

@@ -3,6 +3,7 @@ from decimal import Decimal
 from unittest.mock import Mock, patch
 
 import pytest
+from django.contrib.auth.models import AnonymousUser
 
 from ...checkout.calculations import checkout_total
 from ...checkout.fetch import fetch_checkout_info, fetch_checkout_lines
@@ -771,7 +772,7 @@ def test_payment_is_not_owned_by_user_for_checkout(payment, checkout, customer_u
 
 def test_payment_owned_by_user_anonymous_user(payment):
     # given
-    user = None
+    user = AnonymousUser()
 
     # when
     is_owned = payment_owned_by_user(payment.pk, user)

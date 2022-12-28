@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"createTransactionModel": {"companyCode": "DEFAULT", "type": "SalesOrder",
-      "lines": [], "code": "b47700e7-dab7-4be8-8374-4f77de101efe", "date": "2022-09-08",
+      "lines": [], "code": "af2d109e-8c07-4438-b13e-ff4e21024b8a", "date": "2022-06-10",
       "customerCode": 0, "discount": null, "addresses": {"shipFrom": {"line1": "Teczowa
       7", "line2": null, "city": "Wroclaw", "region": "", "country": "PL", "postalCode":
       "53-601"}, "shipTo": {"line1": "O\u0142awska 10", "line2": "", "city": "WROC\u0141AW",
@@ -19,9 +19,9 @@ interactions:
       Content-Length:
       - '535'
       User-Agent:
-      - python-requests/2.28.1
+      - python-requests/2.27.1
     method: POST
-    uri: https://sandbox-rest.avatax.com/api/v2/transactions/createoradjust
+    uri: https://rest.avatax.com/api/v2/transactions/createoradjust
   response:
     body:
       string: '{"error":{"code":"MissingLine","message":"Transactions must have at
@@ -34,15 +34,13 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Thu, 08 Sep 2022 10:53:23 GMT
+      - Fri, 10 Jun 2022 10:43:49 GMT
       ServerDuration:
-      - '00:00:00.0001835'
+      - '00:00:00.0004194'
       Transfer-Encoding:
       - chunked
       X-Content-Type-Options:
       - nosniff
-      api-supported-versions:
-      - '2.0'
       cache-control:
       - private, no-cache, no-store
       referrer-policy:
@@ -50,9 +48,9 @@ interactions:
       strict-transport-security:
       - max-age=31536000; includeSubdomains
       x-avalara-uid:
-      - eab8e0b4-d5bd-4db4-afef-d20ae720183a
+      - f4bc7115-59ca-4987-850c-bdc3a18b43ce
       x-correlation-id:
-      - eab8e0b4-d5bd-4db4-afef-d20ae720183a
+      - f4bc7115-59ca-4987-850c-bdc3a18b43ce
       x-frame-options:
       - sameorigin
       x-permitted-cross-domain-policies:

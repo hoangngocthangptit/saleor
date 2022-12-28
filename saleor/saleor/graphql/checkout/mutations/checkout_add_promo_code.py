@@ -1,6 +1,7 @@
 import graphene
 from django.core.exceptions import ValidationError
 
+from ....checkout.checkout_cleaner import validate_checkout_email
 from ....checkout.error_codes import CheckoutErrorCode
 from ....checkout.fetch import (
     fetch_checkout_info,
@@ -12,8 +13,6 @@ from ...core.descriptions import ADDED_IN_34, DEPRECATED_IN_3X_INPUT
 from ...core.mutations import BaseMutation
 from ...core.scalars import UUID
 from ...core.types import CheckoutError
-from ...discount.dataloaders import load_discounts
-from ...plugins.dataloaders import load_plugin_manager
 from ..types import Checkout
 from .utils import get_checkout, update_checkout_shipping_method_if_invalid
 
@@ -60,10 +59,12 @@ class CheckoutAddPromoCode(BaseMutation):
             error_class=CheckoutErrorCode,
         )
 
-        manager = load_plugin_manager(info.context)
-        discounts = load_discounts(info.context)
-        lines, unavailable_variant_pks = fetch_checkout_lines(checkout)
+        validate_checkout_email(checkout)
 
+        manager = info.context.plugins
+        discounts = info.context.discounts
+
+        lines, unavailable_variant_pks = fetch_checkout_lines(checkout)
         if unavailable_variant_pks:
             not_available_variants_ids = {
                 graphene.Node.to_global_id("ProductVariant", pk)
@@ -112,6 +113,6 @@ class CheckoutAddPromoCode(BaseMutation):
             recalculate_discount=False,
             save=True,
         )
-        cls.call_event(manager.checkout_updated, checkout)
+        manager.checkout_updated(checkout)
 
         return CheckoutAddPromoCode(checkout=checkout)

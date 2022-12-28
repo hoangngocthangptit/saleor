@@ -4,7 +4,6 @@ from ...core.permissions import ShippingPermissions
 from ...shipping import models
 from ..core.mutations import ModelBulkDeleteMutation
 from ..core.types import NonNullList, ShippingError
-from ..plugins.dataloaders import load_plugin_manager
 from .types import ShippingMethod, ShippingZone
 
 
@@ -28,9 +27,8 @@ class ShippingZoneBulkDelete(ModelBulkDeleteMutation):
     def bulk_action(cls, info, queryset):
         zones = [zone for zone in queryset]
         queryset.delete()
-        manager = load_plugin_manager(info.context)
         for zone in zones:
-            manager.shipping_zone_deleted(zone)
+            info.context.plugins.shipping_zone_deleted(zone)
 
 
 class ShippingPriceBulkDelete(ModelBulkDeleteMutation):
@@ -70,6 +68,5 @@ class ShippingPriceBulkDelete(ModelBulkDeleteMutation):
     def bulk_action(cls, info, queryset):
         shipping_methods = [sm for sm in queryset]
         queryset.delete()
-        manager = load_plugin_manager(info.context)
         for method in shipping_methods:
-            manager.shipping_price_deleted(method)
+            info.context.plugins.shipping_price_deleted(method)

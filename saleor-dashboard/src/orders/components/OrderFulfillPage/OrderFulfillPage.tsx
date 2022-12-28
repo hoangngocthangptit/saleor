@@ -4,6 +4,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TableRow,
 } from "@material-ui/core";
 import { Backlink } from "@saleor/components/Backlink";
 import CardSpacer from "@saleor/components/CardSpacer";
@@ -15,7 +16,6 @@ import PageHeader from "@saleor/components/PageHeader";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
 import Savebar from "@saleor/components/Savebar";
 import Skeleton from "@saleor/components/Skeleton";
-import TableRowLink from "@saleor/components/TableRowLink";
 import {
   FulfillOrderMutation,
   OrderErrorCode,
@@ -227,7 +227,7 @@ const OrderFulfillPage: React.FC<OrderFulfillPageProps> = props => {
                 {order ? (
                   <ResponsiveTable className={classes.table}>
                     <TableHead>
-                      <TableRowLink>
+                      <TableRow>
                         <TableCell className={classes.colName}>
                           <FormattedMessage {...messages.productName} />
                         </TableCell>
@@ -248,7 +248,7 @@ const OrderFulfillPage: React.FC<OrderFulfillPageProps> = props => {
                         <TableCell className={classes.colWarehouse}>
                           <FormattedMessage {...messages.warehouse} />
                         </TableCell>
-                      </TableRowLink>
+                      </TableRow>
                     </TableHead>
                     <TableBody>
                       {renderCollection(

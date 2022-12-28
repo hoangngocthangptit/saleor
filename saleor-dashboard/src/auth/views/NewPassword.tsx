@@ -41,7 +41,7 @@ const NewPassword: React.FC<RouteComponentProps> = ({ location }) => {
   return (
     <NewPasswordPage
       errors={errors}
-      loading={loading}
+      disabled={loading}
       onSubmit={handleSubmit}
     />
   );

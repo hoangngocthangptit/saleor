@@ -96,9 +96,8 @@ export const ProductVariant: React.FC<ProductVariantCreateProps> = ({
     reorderProductVariantsOpts,
   ] = useProductVariantReorderMutation({});
 
-  const handleVariantReorder = createVariantReorderHandler(
-    product,
-    reorderProductVariants,
+  const handleVariantReorder = createVariantReorderHandler(product, variables =>
+    reorderProductVariants({ variables }),
   );
 
   const handleCreate = async (formData: ProductVariantCreateData) => {
@@ -124,7 +123,6 @@ export const ProductVariant: React.FC<ProductVariantCreateProps> = ({
           }),
           product: productId,
           sku: formData.sku,
-          name: formData.name,
           stocks: formData.stocks.map(stock => ({
             quantity: parseInt(stock.value, 10) || 0,
             warehouse: stock.id,

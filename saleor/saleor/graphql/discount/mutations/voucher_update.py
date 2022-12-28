@@ -3,7 +3,6 @@ import graphene
 from ....core.permissions import DiscountPermissions
 from ....discount import models
 from ...core.types import DiscountError
-from ...plugins.dataloaders import load_plugin_manager
 from ..types import Voucher
 from .voucher_create import VoucherCreate, VoucherInput
 
@@ -25,5 +24,4 @@ class VoucherUpdate(VoucherCreate):
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.voucher_updated, instance)
+        info.context.plugins.voucher_updated(instance)

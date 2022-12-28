@@ -58,9 +58,6 @@ describe("Tests for menu navigation", () => {
         const itemName = `${startsWith}${faker.datatype.number()}`;
         let selectedItem;
 
-        cy.addAliasToGraphRequest("SearchCategories")
-          .addAliasToGraphRequest("SearchPages")
-          .addAliasToGraphRequest("SearchCollections");
         createNewMenuItem({
           menuId: menu.id,
           name: itemName,

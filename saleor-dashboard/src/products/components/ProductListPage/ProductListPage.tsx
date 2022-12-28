@@ -2,7 +2,6 @@ import { Card } from "@material-ui/core";
 import {
   extensionMountPoints,
   mapToMenuItems,
-  mapToMenuItemsForProductOverviewActions,
   useExtensions,
 } from "@saleor/apps/useExtensions";
 import { ButtonWithSelect } from "@saleor/components/ButtonWithSelect";
@@ -62,7 +61,6 @@ export interface ProductListPageProps
   gridAttributes: RelayToFlat<GridAttributesQuery["grid"]>;
   limits: RefreshLimitsQuery["shop"]["limits"];
   products: RelayToFlat<ProductListQuery["products"]>;
-  selectedProductIds: string[];
   onAdd: () => void;
   onExport: () => void;
   onColumnQueryChange: (query: string) => void;
@@ -115,7 +113,6 @@ export const ProductListPage: React.FC<ProductListPageProps> = props => {
     onTabSave,
     onUpdateListSettings,
     selectedChannelId,
-    selectedProductIds,
     ...listProps
   } = props;
   const intl = useIntl();
@@ -176,10 +173,7 @@ export const ProductListPage: React.FC<ProductListPageProps> = props => {
     PRODUCT_OVERVIEW_MORE_ACTIONS,
   } = useExtensions(extensionMountPoints.PRODUCT_LIST);
 
-  const extensionMenuItems = mapToMenuItemsForProductOverviewActions(
-    PRODUCT_OVERVIEW_MORE_ACTIONS,
-    selectedProductIds,
-  );
+  const extensionMenuItems = mapToMenuItems(PRODUCT_OVERVIEW_MORE_ACTIONS);
   const extensionCreateButtonItems = mapToMenuItems(PRODUCT_OVERVIEW_CREATE);
 
   return (

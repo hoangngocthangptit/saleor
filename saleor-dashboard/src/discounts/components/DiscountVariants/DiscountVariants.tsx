@@ -1,4 +1,10 @@
-import { Card, TableBody, TableCell, TableFooter } from "@material-ui/core";
+import {
+  Card,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableRow,
+} from "@material-ui/core";
 import { Button } from "@saleor/components/Button";
 import CardTitle from "@saleor/components/CardTitle";
 import Checkbox from "@saleor/components/Checkbox";
@@ -90,9 +96,9 @@ const DiscountVariants: React.FC<SaleVariantsProps> = props => {
           <TableCell className={classes.colActions} />
         </TableHead>
         <TableFooter>
-          <TableRowLink>
+          <TableRow>
             <TablePaginationWithContext colSpan={numberOfColumns} />
-          </TableRowLink>
+          </TableRow>
         </TableFooter>
         <TableBody>
           {renderCollection(
@@ -155,11 +161,11 @@ const DiscountVariants: React.FC<SaleVariantsProps> = props => {
               );
             },
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={numberOfColumns}>
                   <FormattedMessage {...messages.discountVariantsNotFound} />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </TableBody>

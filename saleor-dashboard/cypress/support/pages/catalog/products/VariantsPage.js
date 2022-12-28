@@ -19,6 +19,7 @@ export function createVariant({
   costPrice = price,
   quantity = 10,
 }) {
+  cy.get(PRODUCT_DETAILS.addVariantButton).click();
   fillUpVariantDetails({
     attributeName,
     sku,
@@ -199,13 +200,4 @@ export function saveVariant(waitForAlias = "VariantCreate") {
     .get(BUTTON_SELECTORS.confirm)
     .click()
     .waitForRequestAndCheckIfNoErrors(`@${waitForAlias}`);
-}
-
-export function selectChannelsForVariant() {
-  cy.get(VARIANTS_SELECTORS.manageChannels)
-    .click()
-    .get(VARIANTS_SELECTORS.allChannels)
-    .check()
-    .get(BUTTON_SELECTORS.submit)
-    .click();
 }

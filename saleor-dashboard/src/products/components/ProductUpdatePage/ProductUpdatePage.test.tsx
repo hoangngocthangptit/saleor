@@ -1,7 +1,8 @@
 import placeholderImage from "@assets/images/placeholder255x255.png";
 import { channelsList } from "@saleor/channels/fixtures";
+import { createChannelsData } from "@saleor/channels/utils";
 import { collections } from "@saleor/collections/fixtures";
-import { fetchMoreProps, limits } from "@saleor/fixtures";
+import { fetchMoreProps, limits, listActionsProps } from "@saleor/fixtures";
 import { product as productFixture } from "@saleor/products/fixtures";
 import { taxTypes } from "@saleor/storybook/stories/taxes/fixtures";
 import { warehouseList } from "@saleor/warehouses/fixtures";
@@ -12,9 +13,10 @@ import React from "react";
 import ProductUpdatePage, { ProductUpdatePageProps } from "./ProductUpdatePage";
 
 const product = productFixture(placeholderImage);
+const channels = createChannelsData(channelsList);
 
 import * as _useNavigator from "@saleor/hooks/useNavigator";
-import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
+import Adapter from "enzyme-adapter-react-16";
 import { act } from "react-dom/test-utils";
 import { MemoryRouter } from "react-router-dom";
 
@@ -24,17 +26,6 @@ const onSubmit = jest.fn();
 const useNavigator = jest.spyOn(_useNavigator, "default");
 jest.mock("@saleor/components/RichTextEditor/RichTextEditor");
 jest.mock("@saleor/utils/richText/useRichText");
-/**
- * Mocking glide library. We do want to test only if page renders, grid itself has dedicated tests.
- */
-jest.mock("@glideapps/glide-data-grid", () => {
-  const { forwardRef } = jest.requireActual("react");
-  return {
-    ...jest.requireActual("@glideapps/glide-data-grid"),
-    __esModule: true,
-    default: forwardRef((_: any, ref: any) => <div ref={ref} />),
-  };
-});
 
 (global as any).document.createRange = () => ({
   // eslint-disable-next-line
@@ -48,13 +39,18 @@ jest.mock("@glideapps/glide-data-grid", () => {
 });
 
 const props: ProductUpdatePageProps = {
-  channels: channelsList,
-  variantListErrors: [],
+  ...listActionsProps,
   productId: "123",
+  allChannelsCount: 5,
   categories: [product.category],
+  channelsData: [],
+  channelsWithVariantsData: {},
   isSimpleProduct: false,
+  setChannelsData: () => undefined,
   channelsErrors: [],
   collections,
+  currentChannels: channels,
+  defaultWeightUnit: "kg",
   disabled: false,
   errors: [],
   fetchCategories: () => undefined,
@@ -67,21 +63,25 @@ const props: ProductUpdatePageProps = {
   header: product.name,
   media: product.media,
   limits,
-  refetch: () => undefined,
-  onAttributeValuesSearch: () => Promise.resolve([]),
   onAssignReferencesClick: () => undefined,
+  onChannelsChange: () => undefined,
   onCloseDialog: () => undefined,
   onDelete: () => undefined,
   onImageDelete: () => undefined,
   onImageUpload: () => undefined,
   onMediaUrlUpload: () => undefined,
+  onSetDefaultVariant: () => undefined,
   onSubmit,
-  onVariantShow: () => undefined,
+  onVariantReorder: () => undefined,
+  onVariantEndPreorderDialogOpen: () => undefined,
+  onWarehouseConfigure: () => undefined,
+  openChannelsModal: () => undefined,
   placeholderImage,
   product,
   referencePages: [],
   referenceProducts: [],
   saveButtonBarState: "default",
+  selectedChannelId: "123",
   taxTypes,
   variants: product.variants,
   warehouses: warehouseList,
@@ -96,7 +96,6 @@ const selectors = {
 
 describe("Product details page", () => {
   useNavigator.mockImplementation();
-  // DataEditor.mockImplementation();
   it("can select empty option on attribute", async () => {
     const component = mount(
       <MemoryRouter>

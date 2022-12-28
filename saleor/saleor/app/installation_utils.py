@@ -1,7 +1,6 @@
 import requests
 from django.conf import settings
 from django.contrib.sites.models import Site
-from requests import HTTPError, Response
 
 from ..core.permissions import get_permission_names
 from ..plugins.manager import PluginsManager
@@ -11,21 +10,6 @@ from .models import App, AppExtension, AppInstallation
 from .types import AppExtensionTarget, AppType
 
 REQUEST_TIMEOUT = 25
-
-
-class AppInstallationError(HTTPError):
-    pass
-
-
-def validate_app_install_response(response: Response):
-    try:
-        response.raise_for_status()
-    except HTTPError as err:
-        try:
-            error_msg = str(response.json()["error"]["message"])
-        except Exception:
-            raise err
-        raise AppInstallationError(error_msg, response=response)
 
 
 def send_app_token(target_url: str, token: str):
@@ -40,7 +24,7 @@ def send_app_token(target_url: str, token: str):
     response = requests.post(
         target_url, json=json_data, headers=headers, timeout=REQUEST_TIMEOUT
     )
-    validate_app_install_response(response)
+    response.raise_for_status()
 
 
 def install_app(app_installation: AppInstallation, activate: bool = False):
@@ -67,7 +51,6 @@ def install_app(app_installation: AppInstallation, activate: bool = False):
         version=manifest_data.get("version"),
         manifest_url=app_installation.manifest_url,
         type=AppType.THIRDPARTY,
-        audience=manifest_data.get("audience"),
     )
     app.permissions.set(app_installation.permissions.all())
     for extension_data in manifest_data.get("extensions", []):

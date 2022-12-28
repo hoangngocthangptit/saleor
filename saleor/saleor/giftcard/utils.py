@@ -11,6 +11,7 @@ from ..checkout.models import Checkout
 from ..core.exceptions import GiftCardNotApplicable
 from ..core.tracing import traced_atomic_transaction
 from ..core.utils.promo_code import InvalidPromoCode, generate_promo_code
+from ..core.utils.validators import user_is_valid
 from ..order.actions import create_fulfillments
 from ..order.models import OrderLine
 from ..site import GiftCardSettingsExpiryType
@@ -33,13 +34,8 @@ def add_gift_card_code_to_checkout(
 ):
     """Add gift card data to checkout by code.
 
-    Raise ValidationError if email is not provided.
     Raise InvalidPromoCode if gift card cannot be applied.
     """
-    from ..checkout.checkout_cleaner import validate_checkout_email
-
-    validate_checkout_email(checkout)
-
     try:
         # only active gift card with currency the same as channel currency can be used
         gift_card = (
@@ -94,6 +90,8 @@ def fulfill_non_shippable_gift_cards(
     app: Optional["App"],
     manager: "PluginsManager",
 ):
+    if not user_is_valid(requestor_user):
+        requestor_user = None
     gift_card_lines = get_non_shippable_gift_card_lines(order_lines)
     if not gift_card_lines:
         return

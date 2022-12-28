@@ -568,7 +568,14 @@ class AvataxPlugin(BasePlugin):
                     net = Money(amount=net, currency=currency)
                 return TaxedMoney(net=net, gross=gross)
 
-        price = order.base_shipping_price
+        channel_listing = None
+        if shipping_method := order.shipping_method:
+            channel_listing = shipping_method.channel_listings.filter(
+                channel_id=order.channel_id
+            ).first()
+        if not channel_listing:
+            return previous_value
+        price = channel_listing.price
         return TaxedMoney(
             net=price,
             gross=price,
@@ -609,7 +616,7 @@ class AvataxPlugin(BasePlugin):
             ).price_with_discounts
             taxed_subtotal += taxed_line_total_data
 
-        base_shipping_price = order.base_shipping_price
+        base_shipping_price = base_order_calculations.base_order_shipping(order)
         shipping_price = self._calculate_order_shipping(
             order, taxes_data, base_shipping_price
         )

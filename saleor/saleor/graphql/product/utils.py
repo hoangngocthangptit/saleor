@@ -64,8 +64,7 @@ def get_used_variants_attribute_values(product):
     used_attribute_values = []
     for variant in variants:
         attribute_values = get_used_attribute_values_for_variant(variant)
-        if attribute_values:
-            used_attribute_values.append(attribute_values)
+        used_attribute_values.append(attribute_values)
     return used_attribute_values
 
 

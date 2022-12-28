@@ -19,7 +19,6 @@ from ..core.enums import PermissionEnum
 from ..core.mutations import BaseMutation, ModelDeleteMutation, ModelMutation
 from ..core.types import AppError, NonNullList
 from ..decorators import staff_member_required
-from ..plugins.dataloaders import load_plugin_manager
 from ..utils import get_user_or_app_from_context, requestor_is_superuser
 from .types import App, AppInstallation, AppToken, Manifest
 from .utils import ensure_can_manage_permissions
@@ -178,8 +177,7 @@ class AppCreate(ModelMutation):
         cls._save_m2m(info, instance, cleaned_input)
         response = cls.success_response(instance)
         response.auth_token = auth_token
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.app_installed, instance)
+        info.context.plugins.app_installed(instance)
         return response
 
     @classmethod
@@ -225,8 +223,7 @@ class AppUpdate(ModelMutation):
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.app_updated, instance)
+        info.context.plugins.app_updated(instance)
 
 
 class AppDelete(ModelDeleteMutation):
@@ -253,8 +250,7 @@ class AppDelete(ModelDeleteMutation):
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.app_deleted, instance)
+        info.context.plugins.app_deleted(instance)
 
 
 class AppActivate(ModelMutation):
@@ -274,8 +270,7 @@ class AppActivate(ModelMutation):
         app = cls.get_instance(info, **data)
         app.is_active = True
         cls.save(info, app, cleaned_input=None)
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.app_status_changed, app)
+        info.context.plugins.app_status_changed(app)
         return cls.success_response(app)
 
 
@@ -296,8 +291,7 @@ class AppDeactivate(ModelMutation):
         app = cls.get_instance(info, **data)
         app.is_active = False
         cls.save(info, app, cleaned_input=None)
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.app_status_changed, app)
+        info.context.plugins.app_status_changed(app)
         return cls.success_response(app)
 
 
@@ -479,7 +473,6 @@ class AppFetchManifest(BaseMutation):
             permissions=cleaned_data.get("permissions"),
             extensions=cleaned_data.get("extensions", []),
             webhooks=cleaned_data.get("webhooks", []),
-            audience=cleaned_data.get("audience"),
         )
 
     @classmethod

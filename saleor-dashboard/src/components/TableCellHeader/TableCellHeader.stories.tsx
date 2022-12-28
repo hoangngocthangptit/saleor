@@ -1,6 +1,11 @@
-import { Card, TableBody, TableCell, TableHead } from "@material-ui/core";
+import {
+  Card,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { storiesOf } from "@storybook/react";
 import React from "react";
 
@@ -24,7 +29,7 @@ const Story: React.FC<StoryProps> = ({
   <Card style={{ margin: "auto", width: 400 }}>
     <ResponsiveTable>
       <TableHead>
-        <TableRowLink>
+        <TableRow>
           <TableCellHeader
             arrowPosition="right"
             direction={field === "name" ? direction : undefined}
@@ -38,13 +43,13 @@ const Story: React.FC<StoryProps> = ({
           >
             Type
           </TableCellHeader>
-        </TableRowLink>
+        </TableRow>
       </TableHead>
       <TableBody>
-        <TableRowLink>
+        <TableRow>
           <TableCell>Apple Juice</TableCell>
           <TableCell>Juice</TableCell>
-        </TableRowLink>
+        </TableRow>
       </TableBody>
     </ResponsiveTable>
   </Card>

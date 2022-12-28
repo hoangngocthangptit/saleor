@@ -1,7 +1,12 @@
-import { TableBody, TableCell, TableHead, Typography } from "@material-ui/core";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@material-ui/core";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
 import Skeleton from "@saleor/components/Skeleton";
-import TableRowLink from "@saleor/components/TableRowLink";
 import { OrderDetailsFragment, OrderErrorFragment } from "@saleor/graphql";
 import { makeStyles } from "@saleor/macaw-ui";
 import {
@@ -79,7 +84,7 @@ const OrderDraftDetailsProducts: React.FC<OrderDraftDetailsProductsProps> = prop
     <ResponsiveTable className={classes.table}>
       {!!lines.length && (
         <TableHead>
-          <TableRowLink>
+          <TableRow>
             <TableCell className={classes.colName} colSpan={2}>
               <span className={classes.colNameLabel}>
                 <FormattedMessage id="x/ZVlU" defaultMessage="Product" />
@@ -107,7 +112,7 @@ const OrderDraftDetailsProducts: React.FC<OrderDraftDetailsProductsProps> = prop
               />
             </TableCell>
             <TableCell className={classes.colAction} />
-          </TableRowLink>
+          </TableRow>
         </TableHead>
       )}
       <TableBody>
@@ -131,7 +136,7 @@ const OrderDraftDetailsProducts: React.FC<OrderDraftDetailsProductsProps> = prop
           ))
         ) : (
           <>
-            <TableRowLink>
+            <TableRow>
               <TableCell colSpan={5}>
                 <FormattedMessage
                   id="UD7/q8"
@@ -143,7 +148,7 @@ const OrderDraftDetailsProducts: React.FC<OrderDraftDetailsProductsProps> = prop
                   </Typography>
                 )}
               </TableCell>
-            </TableRowLink>
+            </TableRow>
           </>
         )}
       </TableBody>

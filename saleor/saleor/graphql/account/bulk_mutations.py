@@ -8,7 +8,6 @@ from ...account.error_codes import AccountErrorCode
 from ...core.permissions import AccountPermissions
 from ..core.mutations import BaseBulkMutation, ModelBulkDeleteMutation
 from ..core.types import AccountError, NonNullList, StaffError
-from ..plugins.dataloaders import load_plugin_manager
 from .types import User
 from .utils import CustomerDeleteMixin, StaffDeleteMixin
 
@@ -42,9 +41,8 @@ class CustomerBulkDelete(CustomerDeleteMixin, UserBulkDelete):
     def bulk_action(cls, info, queryset):
         instances = list(queryset)
         queryset.delete()
-        manager = load_plugin_manager(info.context)
         for instance in instances:
-            manager.customer_deleted(instance)
+            info.context.plugins.customer_deleted(instance)
 
 
 class StaffBulkDelete(StaffDeleteMixin, UserBulkDelete):
@@ -87,9 +85,8 @@ class StaffBulkDelete(StaffDeleteMixin, UserBulkDelete):
     def bulk_action(cls, info, queryset):
         instances = list(queryset)
         queryset.delete()
-        manager = load_plugin_manager(info.context)
         for instance in instances:
-            manager.staff_deleted(instance)
+            info.context.plugins.staff_deleted(instance)
 
 
 class UserBulkSetActive(BaseBulkMutation):

@@ -3,6 +3,7 @@ from copy import copy
 
 import graphene
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from ....account import events as account_events
 from ....account import models, utils
@@ -23,11 +24,9 @@ from ....order.utils import match_orders_with_new_user
 from ....thumbnail import models as thumbnail_models
 from ...account.enums import AddressTypeEnum
 from ...account.types import Address, AddressInput, User
-from ...app.dataloaders import load_app
 from ...core.mutations import BaseMutation, ModelDeleteMutation, ModelMutation
 from ...core.types import AccountError, NonNullList, StaffError, Upload
 from ...core.utils import add_hash_to_file_name, validate_image_file
-from ...plugins.dataloaders import load_plugin_manager
 from ...utils.validators import check_for_duplicates
 from ..utils import (
     CustomerDeleteMixin,
@@ -106,7 +105,7 @@ class CustomerUpdate(CustomerCreate):
     ):
         # Retrieve the event base data
         staff_user = info.context.user
-        app = load_app(info.context)
+        app = info.context.app
         new_email = new_instance.email
         new_fullname = new_instance.get_full_name()
 
@@ -130,13 +129,13 @@ class CustomerUpdate(CustomerCreate):
         if was_activated:
             account_events.customer_account_activated_event(
                 staff_user=info.context.user,
-                app=app,
+                app=info.context.app,
                 account_id=old_instance.id,
             )
         if was_deactivated:
             account_events.customer_account_deactivated_event(
                 staff_user=info.context.user,
-                app=app,
+                app=info.context.app,
                 account_id=old_instance.id,
             )
 
@@ -192,8 +191,7 @@ class CustomerDelete(CustomerDeleteMixin, UserDelete):
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.customer_deleted, instance)
+        info.context.plugins.customer_deleted(instance)
 
 
 class StaffCreate(ModelMutation):
@@ -216,8 +214,7 @@ class StaffCreate(ModelMutation):
 
     @classmethod
     def check_permissions(cls, context, permissions=None):
-        app = load_app(context)
-        if app:
+        if context.app:
             raise PermissionDenied(
                 message="Apps are not allowed to perform this mutation."
             )
@@ -290,27 +287,25 @@ class StaffCreate(ModelMutation):
             )
         user.save()
         if cleaned_input.get("redirect_url") and send_notification:
-            manager = load_plugin_manager(info.context)
             send_set_password_notification(
                 redirect_url=cleaned_input.get("redirect_url"),
                 user=user,
-                manager=manager,
+                manager=info.context.plugins,
                 channel_slug=None,
                 staff=True,
             )
 
     @classmethod
+    @traced_atomic_transaction()
     def _save_m2m(cls, info, instance, cleaned_data):
-        with traced_atomic_transaction():
-            super()._save_m2m(info, instance, cleaned_data)
-            groups = cleaned_data.get("add_groups")
-            if groups:
-                instance.groups.add(*groups)
+        super()._save_m2m(info, instance, cleaned_data)
+        groups = cleaned_data.get("add_groups")
+        if groups:
+            instance.groups.add(*groups)
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.staff_created, instance)
+        info.context.plugins.staff_created(instance)
 
     @classmethod
     def get_instance(cls, info, **data):
@@ -461,15 +456,15 @@ class StaffUpdate(StaffCreate):
             errors["is_active"].append(error)
 
     @classmethod
+    @traced_atomic_transaction()
     def _save_m2m(cls, info, instance, cleaned_data):
-        with traced_atomic_transaction():
-            super()._save_m2m(info, instance, cleaned_data)
-            add_groups = cleaned_data.get("add_groups")
-            if add_groups:
-                instance.groups.add(*add_groups)
-            remove_groups = cleaned_data.get("remove_groups")
-            if remove_groups:
-                instance.groups.remove(*remove_groups)
+        super()._save_m2m(info, instance, cleaned_data)
+        add_groups = cleaned_data.get("add_groups")
+        if add_groups:
+            instance.groups.add(*add_groups)
+        remove_groups = cleaned_data.get("remove_groups")
+        if remove_groups:
+            instance.groups.remove(*remove_groups)
 
     @classmethod
     def perform_mutation(cls, _root, info, **data):
@@ -484,8 +479,7 @@ class StaffUpdate(StaffCreate):
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.staff_updated, instance)
+        info.context.plugins.staff_updated(instance)
 
 
 class StaffDelete(StaffDeleteMixin, UserDelete):
@@ -515,8 +509,7 @@ class StaffDelete(StaffDeleteMixin, UserDelete):
         instance.id = db_id
 
         response = cls.success_response(instance)
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.staff_deleted, instance)
+        info.context.plugins.staff_deleted(instance)
 
         return response
 
@@ -543,25 +536,25 @@ class AddressCreate(ModelMutation):
         error_type_field = "account_errors"
 
     @classmethod
+    @traced_atomic_transaction()
     def perform_mutation(cls, root, info, **data):
         user_id = data["user_id"]
         user = cls.get_node_or_error(info, user_id, field="user_id", only_type=User)
-        with traced_atomic_transaction():
-            response = super().perform_mutation(root, info, **data)
-            if not response.errors:
-                manager = load_plugin_manager(info.context)
-                address = manager.change_user_address(response.address, None, user)
-                remove_the_oldest_user_address_if_address_limit_is_reached(user)
-                user.addresses.add(address)
-                response.user = user
-                user.search_document = prepare_user_search_document_value(user)
-                user.save(update_fields=["search_document", "updated_at"])
-            return response
+        response = super().perform_mutation(root, info, **data)
+        if not response.errors:
+            address = info.context.plugins.change_user_address(
+                response.address, None, user
+            )
+            remove_the_oldest_user_address_if_address_limit_is_reached(user)
+            user.addresses.add(address)
+            response.user = user
+            user.search_document = prepare_user_search_document_value(user)
+            user.save(update_fields=["search_document", "updated_at"])
+        return response
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.address_created, instance)
+        transaction.on_commit(lambda: info.context.plugins.address_created(instance))
 
 
 class AddressUpdate(BaseAddressUpdate):
@@ -621,9 +614,11 @@ class AddressSetDefault(BaseMutation):
             address_type = AddressType.BILLING
         else:
             address_type = AddressType.SHIPPING
-        manager = load_plugin_manager(info.context)
-        utils.change_user_default_address(user, address, address_type, manager)
-        cls.call_event(manager.customer_updated, user)
+
+        utils.change_user_default_address(
+            user, address, address_type, info.context.plugins
+        )
+        info.context.plugins.customer_updated(user)
         return cls(user=user)
 
 

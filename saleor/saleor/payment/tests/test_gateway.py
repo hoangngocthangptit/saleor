@@ -2,6 +2,7 @@ from decimal import Decimal
 from unittest.mock import Mock, patch
 
 import pytest
+from django.contrib.auth.models import AnonymousUser
 
 from ...order import OrderEvents
 from ...plugins.manager import get_plugins_manager
@@ -426,7 +427,7 @@ def test_request_capture_action_by_app(
         manager=get_plugins_manager(),
         charge_value=action_value,
         channel_slug=order.channel.slug,
-        user=None,
+        user=AnonymousUser(),  # type: ignore
         app=app,
     )
 
@@ -587,7 +588,7 @@ def test_request_refund_action_by_app(
         manager=get_plugins_manager(),
         refund_value=action_value,
         channel_slug=order.channel.slug,
-        user=None,
+        user=AnonymousUser(),  # type: ignore
         app=app,
     )
 
@@ -740,7 +741,7 @@ def test_request_void_action_by_app(
         transaction=transaction,
         manager=get_plugins_manager(),
         channel_slug=order.channel.slug,
-        user=None,
+        user=AnonymousUser(),  # type:ignore
         app=app,
     )
 

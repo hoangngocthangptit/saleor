@@ -1,8 +1,9 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from unittest.mock import patch
 
 import pytest
+import pytz
 from celery.exceptions import Retry
 from django.http import HttpResponse
 from freezegun import freeze_time
@@ -131,7 +132,7 @@ def test_json_truncate_text_comparison():
     "retry, next_retry_date",
     [
         (Retry(), None),
-        (Retry(when=60 * 10), datetime(1914, 6, 28, 11, tzinfo=timezone.utc)),
+        (Retry(when=60 * 10), datetime(1914, 6, 28, 11, tzinfo=pytz.utc)),
         (Retry(when=datetime(1914, 6, 28, 11)), datetime(1914, 6, 28, 11)),
     ],
 )

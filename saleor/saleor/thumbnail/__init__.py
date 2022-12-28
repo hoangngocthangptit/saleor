@@ -18,11 +18,12 @@ class ThumbnailFormat:
 MIME_TYPE_TO_PIL_IDENTIFIER = {
     "image/bmp": "BMP",
     "image/dcx": "DCX",
-    "image/eps": "EPS",
+    "image/eps": "eps",
     "image/gif": "GIF",
     "image/jpeg": "JPEG",
     "image/pcd": "PCD",
     "image/pcx": "PCX",
+    "application/pdf": "PDF",
     "image/png": "PNG",
     "image/x-ppm": "PPM",
     "image/psd": "PSD",

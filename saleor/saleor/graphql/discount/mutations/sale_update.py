@@ -2,6 +2,7 @@ from datetime import datetime
 
 import graphene
 import pytz
+from django.db import transaction
 
 from ....core.permissions import DiscountPermissions
 from ....core.tracing import traced_atomic_transaction
@@ -9,7 +10,6 @@ from ....discount import models
 from ....discount.utils import fetch_catalogue_info
 from ...core.mutations import ModelMutation
 from ...core.types import DiscountError
-from ...plugins.dataloaders import load_plugin_manager
 from ..types import Sale
 from .sale_create import SaleInput, SaleUpdateDiscountedPriceMixin
 from .utils import convert_catalogue_info_to_global_ids
@@ -31,51 +31,52 @@ class SaleUpdate(SaleUpdateDiscountedPriceMixin, ModelMutation):
         error_type_field = "discount_errors"
 
     @classmethod
+    @traced_atomic_transaction()
     def perform_mutation(cls, _root, info, **data):
         instance = cls.get_instance(info, **data)
         previous_catalogue = fetch_catalogue_info(instance)
         previous_end_date = instance.end_date
         data = data.get("input")
-        manager = load_plugin_manager(info.context)
         cleaned_input = cls.clean_input(info, instance, data)
-        with traced_atomic_transaction():
-            instance = cls.construct_instance(instance, cleaned_input)
-            cls.clean_instance(info, instance)
-            cls.save(info, instance, cleaned_input)
-            cls._save_m2m(info, instance, cleaned_input)
-            cls.send_sale_notifications(
-                manager, instance, cleaned_input, previous_catalogue, previous_end_date
-            )
+        instance = cls.construct_instance(instance, cleaned_input)
+        cls.clean_instance(info, instance)
+        cls.save(info, instance, cleaned_input)
+        cls._save_m2m(info, instance, cleaned_input)
+        cls.send_sale_notifications(
+            info, instance, cleaned_input, previous_catalogue, previous_end_date
+        )
         return cls.success_response(instance)
 
     @classmethod
     def send_sale_notifications(
-        cls, manager, instance, cleaned_input, previous_catalogue, previous_end_date
+        cls, info, instance, cleaned_input, previous_catalogue, previous_end_date
     ):
         current_catalogue = convert_catalogue_info_to_global_ids(
             fetch_catalogue_info(instance)
         )
-        cls.call_event(
-            manager.sale_updated,
-            instance,
-            convert_catalogue_info_to_global_ids(previous_catalogue),
-            current_catalogue,
+        transaction.on_commit(
+            lambda: info.context.plugins.sale_updated(
+                instance,
+                convert_catalogue_info_to_global_ids(previous_catalogue),
+                current_catalogue,
+            )
         )
 
         cls.send_sale_toggle_notification(
-            manager, instance, cleaned_input, current_catalogue, previous_end_date
+            info, instance, cleaned_input, current_catalogue, previous_end_date
         )
 
     @staticmethod
     def send_sale_toggle_notification(
-        manager, instance, clean_input, catalogue, previous_end_date
+        info, instance, clean_input, catalogue, previous_end_date
     ):
         """Send the notification about starting or ending sale if it wasn't sent yet.
 
         Send notification if the notification when the start or end date already passed
-        and the notification_date is not set or the last notification was sent
+        ans the notification_date is not set or the last notification was sent
         before start or end date.
         """
+        manager = info.context.plugins
         now = datetime.now(pytz.utc)
 
         notification_date = instance.notification_sent_datetime

@@ -4,9 +4,9 @@ import { MessageContext } from "@saleor/components/messages";
 import { SubmitPromise } from "@saleor/hooks/useForm";
 import { useContext } from "react";
 
-interface UseHandleFormSubmitProps<TData, TError> {
+interface UseHandleFormSubmitProps<TData, TErrors> {
   formId?: FormId;
-  onSubmit: (data: TData) => SubmitPromise<TError[]> | void;
+  onSubmit: (data: TData) => SubmitPromise<TErrors[]> | void;
 }
 
 function useHandleFormSubmit<TData, TErrors>({

@@ -13,6 +13,7 @@ import {
 } from "../support/api/requests/Customer";
 import { getDefaultChannel } from "../support/api/utils/channelsUtils";
 import { getMailActivationLinkForUser } from "../support/api/utils/users";
+import filterTests from "../support/filterTests";
 
 describe("Tests for customer registration", () => {
   const startsWith = "Registration";
@@ -31,8 +32,7 @@ describe("Tests for customer registration", () => {
   it("should register customer", { tags: ["@customer", "@stagedOnly"] }, () => {
     const email = `${startsWith}${faker.datatype.number()}@example.com`;
     customerRegistration({ email, channel: defaultChannel.slug });
-    const registrationLinkRegex = /\[(\s*http[^\]]*)\]/;
-    getMailActivationLinkForUser(email, registrationLinkRegex)
+    getMailActivationLinkForUser(email)
       .then(urlLink => {
         const tokenRegex = /token=(.*)/;
         const token = urlLink.match(tokenRegex)[1];

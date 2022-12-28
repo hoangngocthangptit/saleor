@@ -1,6 +1,7 @@
 import pytest
 
-from ....product.models import Product
+from saleor.product.models import Product
+
 from ...tests.utils import get_graphql_content
 
 FILTER_BY_META_QUERY = """

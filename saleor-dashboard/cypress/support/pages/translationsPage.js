@@ -56,7 +56,6 @@ export function enterCategoryTranslation(language, categoryName) {
 }
 
 function getCategoryFromTable(categoryName) {
-  cy.get(SHARED_ELEMENTS.skeleton).should("not.exist");
   cy.wait("@CategoryTranslations")
     .its("response.body.data.translations.edges")
     .then(edges => {

@@ -6,7 +6,7 @@ import { ThemeProvider } from "@saleor/macaw-ui";
 import { SaleorProvider } from "@saleor/sdk";
 import React from "react";
 import { render } from "react-dom";
-import { ErrorBoundary } from "react-error-boundary";
+import ErrorBoundary from "react-error-boundary";
 import TagManager from "react-gtm-module";
 import { useIntl } from "react-intl";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
@@ -30,13 +30,12 @@ import useAppChannel, {
   AppChannelProvider,
 } from "./components/AppLayout/AppChannelContext";
 import { DateProvider } from "./components/Date";
-import ErrorPage from "./components/ErrorPage";
 import ExitFormDialogProvider from "./components/Form/ExitFormDialogProvider";
 import { LocaleProvider } from "./components/Locale";
 import MessageManagerProvider from "./components/messages";
 import { ShopProvider } from "./components/Shop";
 import { WindowTitle } from "./components/WindowTitle";
-import { DEMO_MODE, getAppMountUri, GTM_ID } from "./config";
+import { APP_MOUNT_URI, DEMO_MODE, GTM_ID } from "./config";
 import ConfigurationSection from "./configuration";
 import { getConfigMenuItemsPermissions } from "./configuration/utils";
 import AppStateProvider from "./containers/AppState";
@@ -80,7 +79,7 @@ errorTracker.init();
 const App: React.FC = () => (
   <SaleorProvider client={saleorClient}>
     <ApolloProvider client={apolloClient}>
-      <BrowserRouter basename={getAppMountUri()}>
+      <BrowserRouter basename={APP_MOUNT_URI}>
         <ThemeProvider overrides={themeOverrides}>
           <DateProvider>
             <LocaleProvider>
@@ -127,7 +126,6 @@ const Routes: React.FC = () => {
 
   return (
     <>
-      <style>{`#portal { position: fixed; top: 0; }`}</style>
       <WindowTitle title={intl.formatMessage(commonMessages.dashboard)} />
       {DEMO_MODE && <DemoBanner />}
       {homePageLoaded ? (
@@ -144,12 +142,6 @@ const Routes: React.FC = () => {
                 type: "displayError",
               });
             }}
-            fallbackRender={({ resetErrorBoundary }) => (
-              <ErrorPage
-                onBack={resetErrorBoundary}
-                onRefresh={() => window.location.reload()}
-              />
-            )}
           >
             <Switch>
               <SectionRoute exact path="/" component={HomePage} />

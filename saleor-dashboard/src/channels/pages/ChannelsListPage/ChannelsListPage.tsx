@@ -1,4 +1,10 @@
-import { Card, TableBody, TableCell, TableHead } from "@material-ui/core";
+import {
+  Card,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import { channelAddUrl, channelUrl } from "@saleor/channels/urls";
 import { Backlink } from "@saleor/components/Backlink";
 import { Button } from "@saleor/components/Button";
@@ -91,7 +97,7 @@ export const ChannelsListPage: React.FC<ChannelsListPageProps> = ({
       <Card>
         <ResponsiveTable>
           <TableHead>
-            <TableRowLink>
+            <TableRow>
               <TableCellHeader>
                 <FormattedMessage
                   id="j/vV0n"
@@ -106,7 +112,7 @@ export const ChannelsListPage: React.FC<ChannelsListPageProps> = ({
                   description="table actions"
                 />
               </TableCell>
-            </TableRowLink>
+            </TableRow>
           </TableHead>
           <TableBody>
             {renderCollection(
@@ -143,14 +149,14 @@ export const ChannelsListPage: React.FC<ChannelsListPageProps> = ({
                 </TableRowLink>
               ),
               () => (
-                <TableRowLink>
+                <TableRow>
                   <TableCell colSpan={numberOfColumns}>
                     <FormattedMessage
                       id="/glQgs"
                       defaultMessage="No channels found"
                     />
                   </TableCell>
-                </TableRowLink>
+                </TableRow>
               ),
             )}
           </TableBody>

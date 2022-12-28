@@ -18,12 +18,7 @@ export const CreateVariantTitle: React.FC<CreateVariantTitleProps> = ({
     <CardTitle
       title={intl.formatMessage(messages.title)}
       toolbar={
-        <Button
-          variant="tertiary"
-          data-testid="manage-channels-button"
-          disabled={false}
-          onClick={onManageClick}
-        >
+        <Button variant="tertiary" disabled={false} onClick={onManageClick}>
           {intl.formatMessage(messages.manageButtonText)}
         </Button>
       }

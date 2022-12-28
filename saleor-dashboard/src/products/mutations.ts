@@ -82,10 +82,86 @@ export const productVariantSetDefault = gql`
 `;
 
 export const productUpdateMutation = gql`
-  mutation ProductUpdate($id: ID!, $input: ProductInput!) {
+  mutation ProductUpdate(
+    $id: ID!
+    $input: ProductInput!
+    $firstValues: Int
+    $afterValues: String
+    $lastValues: Int
+    $beforeValues: String
+  ) {
     productUpdate(id: $id, input: $input) {
       errors {
         ...ProductErrorWithAttributes
+      }
+      product {
+        ...Product
+      }
+    }
+  }
+`;
+
+export const simpleProductUpdateMutation = gql`
+  mutation SimpleProductUpdate(
+    $id: ID!
+    $input: ProductInput!
+    $productVariantId: ID!
+    $productVariantInput: ProductVariantInput!
+    $addStocks: [StockInput!]!
+    $deleteStocks: [ID!]!
+    $updateStocks: [StockInput!]!
+    $firstValues: Int
+    $afterValues: String
+    $lastValues: Int
+    $beforeValues: String
+  ) {
+    productUpdate(id: $id, input: $input) {
+      errors {
+        ...ProductErrorWithAttributes
+      }
+      product {
+        ...Product
+      }
+    }
+    productVariantUpdate(id: $productVariantId, input: $productVariantInput) {
+      errors {
+        ...ProductErrorWithAttributes
+      }
+      productVariant {
+        ...ProductVariant
+      }
+    }
+    productVariantStocksCreate(
+      stocks: $addStocks
+      variantId: $productVariantId
+    ) {
+      errors {
+        ...BulkStockError
+      }
+      productVariant {
+        ...ProductVariant
+      }
+    }
+    productVariantStocksDelete(
+      warehouseIds: $deleteStocks
+      variantId: $productVariantId
+    ) {
+      errors {
+        ...StockError
+      }
+      productVariant {
+        ...ProductVariant
+      }
+    }
+    productVariantStocksUpdate(
+      stocks: $updateStocks
+      variantId: $productVariantId
+    ) {
+      errors {
+        ...BulkStockError
+      }
+      productVariant {
+        ...ProductVariant
       }
     }
   }
@@ -117,48 +193,6 @@ export const variantDeleteMutation = gql`
   }
 `;
 
-export const variantDatagridUpdateMutation = gql`
-  mutation VariantDatagridUpdate($id: ID!, $input: ProductVariantInput!) {
-    productVariantUpdate(id: $id, input: $input) {
-      errors {
-        ...ProductErrorWithAttributes
-      }
-    }
-  }
-`;
-
-export const variantDatagridStockUpdateMutation = gql`
-  mutation VariantDatagridStockUpdate(
-    $stocks: [StockInput!]!
-    $removeStocks: [ID!]!
-    $id: ID!
-  ) {
-    productVariantStocksDelete(warehouseIds: $removeStocks, variantId: $id) {
-      errors {
-        ...ProductVariantStocksDeleteError
-      }
-    }
-    productVariantStocksUpdate(stocks: $stocks, variantId: $id) {
-      errors {
-        ...BulkStockError
-      }
-    }
-  }
-`;
-
-export const variantDatagridChannelListingUpdateMutation = gql`
-  mutation VariantDatagridChannelListingUpdate(
-    $id: ID!
-    $input: [ProductVariantChannelListingAddInput!]!
-  ) {
-    productVariantChannelListingUpdate(id: $id, input: $input) {
-      errors {
-        ...ProductChannelListingError
-      }
-    }
-  }
-`;
-
 export const variantUpdateMutation = gql`
   mutation VariantUpdate(
     $addStocks: [StockInput!]!
@@ -175,7 +209,6 @@ export const variantUpdateMutation = gql`
     $afterValues: String
     $lastValues: Int
     $beforeValues: String
-    $name: String!
   ) {
     productVariantStocksDelete(warehouseIds: $removeStocks, variantId: $id) {
       errors {
@@ -216,7 +249,6 @@ export const variantUpdateMutation = gql`
         preorder: $preorder
         weight: $weight
         quantityLimitPerCustomer: $quantityLimitPerCustomer
-        name: $name
       }
     ) {
       errors {
@@ -350,22 +382,6 @@ export const productBulkDeleteMutation = gql`
   }
 `;
 
-export const ProductVariantBulkCreateMutation = gql`
-  mutation ProductVariantBulkCreate(
-    $id: ID!
-    $inputs: [ProductVariantBulkCreateInput!]!
-  ) {
-    productVariantBulkCreate(product: $id, variants: $inputs) {
-      errors {
-        ...BulkProductError
-      }
-      productVariants {
-        id
-      }
-    }
-  }
-`;
-
 export const ProductVariantBulkDeleteMutation = gql`
   mutation ProductVariantBulkDelete($ids: [ID!]!) {
     productVariantBulkDelete(ids: $ids) {
@@ -395,6 +411,18 @@ export const ProductChannelListingUpdateMutation = gql`
     $input: ProductChannelListingUpdateInput!
   ) {
     productChannelListingUpdate(id: $id, input: $input) {
+      product {
+        id
+        channelListings {
+          ...ChannelListingProductWithoutPricing
+        }
+        variants {
+          id
+          channelListings {
+            ...ChannelListingProductVariant
+          }
+        }
+      }
       errors {
         ...ProductChannelListingError
       }

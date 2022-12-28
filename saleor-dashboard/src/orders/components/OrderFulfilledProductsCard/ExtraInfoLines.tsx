@@ -1,5 +1,4 @@
-import { TableCell, Typography } from "@material-ui/core";
-import TableRowLink from "@saleor/components/TableRowLink";
+import { TableCell, TableRow, Typography } from "@material-ui/core";
 import { FulfillmentStatus, OrderDetailsFragment } from "@saleor/graphql";
 import { getStringOrPlaceholder } from "@saleor/misc";
 import classNames from "classnames";
@@ -26,7 +25,7 @@ const ExtraInfoLines: React.FC<ExtraInfoLinesProps> = ({ fulfillment }) => {
   const { warehouse, trackingNumber, status } = fulfillment;
 
   return (
-    <TableRowLink>
+    <TableRow>
       <TableCell className={classes.infoRow} colSpan={NUMBER_OF_COLUMNS}>
         <Typography color="textSecondary" variant="body2">
           {warehouse && (
@@ -67,7 +66,7 @@ const ExtraInfoLines: React.FC<ExtraInfoLinesProps> = ({ fulfillment }) => {
           )}
         </Typography>
       </TableCell>
-    </TableRowLink>
+    </TableRow>
   );
 };
 

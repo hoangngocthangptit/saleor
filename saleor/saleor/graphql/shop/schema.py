@@ -2,7 +2,6 @@ import graphene
 
 from ...core.permissions import GiftcardPermissions, OrderPermissions
 from ..core.fields import PermissionsField
-from ..site.dataloaders import load_site_callback
 from ..translations.mutations import ShopSettingsTranslate
 from .mutations import (
     GiftCardSettingsUpdate,
@@ -39,13 +38,11 @@ class ShopQueries(graphene.ObjectType):
     def resolve_shop(self, _info):
         return Shop()
 
-    @load_site_callback
-    def resolve_order_settings(self, _info, site):
-        return site.settings
+    def resolve_order_settings(self, info):
+        return info.context.site.settings
 
-    @load_site_callback
-    def resolve_gift_card_settings(self, _info, site):
-        return site.settings
+    def resolve_gift_card_settings(self, info):
+        return info.context.site.settings
 
 
 class ShopMutations(graphene.ObjectType):

@@ -3,6 +3,7 @@ from typing import Dict, List
 
 import graphene
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from ....core.permissions import OrderPermissions
 from ....core.taxes import TaxError
@@ -16,13 +17,9 @@ from ....order.utils import (
     invalidate_order_prices,
     recalculate_order_weight,
 )
-from ...app.dataloaders import load_app
 from ...core.mutations import BaseMutation
 from ...core.types import NonNullList, OrderError
-from ...discount.dataloaders import load_discounts
-from ...plugins.dataloaders import load_plugin_manager
 from ...product.types import ProductVariant
-from ...site.dataloaders import get_site_promise
 from ..types import Order, OrderLine
 from ..utils import (
     OrderLineData,
@@ -145,6 +142,7 @@ class OrderLinesCreate(EditableOrderValidationMixin, BaseMutation):
         return added_lines
 
     @classmethod
+    @traced_atomic_transaction()
     def perform_mutation(cls, _root, info, **data):
         order = cls.get_node_or_error(info, data.get("id"), only_type=Order)
         cls.validate_order(order)
@@ -153,42 +151,38 @@ class OrderLinesCreate(EditableOrderValidationMixin, BaseMutation):
         lines_to_add = cls.validate_lines(info, data, existing_lines_info)
         variants = [line.variant for line in lines_to_add]
         cls.validate_variants(order, variants)
-        app = load_app(info.context)
-        manager = load_plugin_manager(info.context)
-        site = get_site_promise(info.context).get()
-        discounts = load_discounts(info.context)
-        with traced_atomic_transaction():
-            added_lines = cls.add_lines_to_order(
-                order,
-                lines_to_add,
-                info.context.user,
-                app,
-                manager,
-                site.settings,
-                discounts,
-            )
 
-            # Create the products added event
-            events.order_added_products_event(
-                order=order,
-                user=info.context.user,
-                app=app,
-                order_lines=added_lines,
-            )
+        added_lines = cls.add_lines_to_order(
+            order,
+            lines_to_add,
+            info.context.user,
+            info.context.app,
+            info.context.plugins,
+            info.context.site.settings,
+            info.context.discounts,
+        )
 
-            invalidate_order_prices(order)
-            recalculate_order_weight(order)
-            update_order_search_vector(order, save=False)
-            order.save(
-                update_fields=[
-                    "should_refresh_prices",
-                    "weight",
-                    "search_vector",
-                    "updated_at",
-                ]
-            )
-            func = get_webhook_handler_by_order_status(order.status, manager)
-            cls.call_event(func, order)
+        # Create the products added event
+        events.order_added_products_event(
+            order=order,
+            user=info.context.user,
+            app=info.context.app,
+            order_lines=added_lines,
+        )
+
+        invalidate_order_prices(order)
+        recalculate_order_weight(order)
+        update_order_search_vector(order, save=False)
+        order.save(
+            update_fields=[
+                "should_refresh_prices",
+                "weight",
+                "search_vector",
+                "updated_at",
+            ]
+        )
+        func = get_webhook_handler_by_order_status(order.status, info)
+        transaction.on_commit(lambda: func(order))
 
         return OrderLinesCreate(order=order, order_lines=added_lines)
 

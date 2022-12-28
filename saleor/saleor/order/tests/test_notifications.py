@@ -9,7 +9,6 @@ from prices import Money, fixed_discount
 
 from ...core.notify_events import NotifyEventType
 from ...core.prices import quantize_price
-from ...core.tests.utils import get_site_context_payload
 from ...discount import DiscountValueType
 from ...graphql.core.utils import to_global_id_or_none
 from ...graphql.order.utils import OrderLineData
@@ -31,7 +30,7 @@ from ..notifications import (
 from ..utils import add_variant_to_order
 
 
-def test_get_custom_order_payload(order, site_settings):
+def test_get_custom_order_payload(order):
     expected_payload = get_custom_order_payload(order)
     assert expected_payload == {
         "order": {
@@ -91,7 +90,8 @@ def test_get_custom_order_payload(order, site_settings):
             "discount_amount": 0,
         },
         "recipient_email": "test@example.com",
-        **get_site_context_payload(site_settings.site),
+        "domain": "mirumee.com",
+        "site_name": "mirumee.com",
     }
 
 
@@ -273,7 +273,10 @@ def test_get_default_order_payload(order_line):
     }
 
 
-def test_get_default_fulfillment_payload(fulfillment, digital_content, site_settings):
+def test_get_default_fulfillment_payload(
+    fulfillment,
+    digital_content,
+):
     order = fulfillment.order
     fulfillment.tracking_number = "http://tracking.url.com/123"
     fulfillment.save(update_fields=["tracking_number"])
@@ -301,7 +304,8 @@ def test_get_default_fulfillment_payload(fulfillment, digital_content, site_sett
         "physical_lines": [get_default_fulfillment_line_payload(physical_line)],
         "digital_lines": [get_default_fulfillment_line_payload(digital_line)],
         "recipient_email": order.get_customer_email(),
-        **get_site_context_payload(site_settings.site),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
     }
 
 
@@ -321,7 +325,8 @@ def test_send_email_payment_confirmation(mocked_notify, site_settings, payment_d
             "captured_amount": payment_dummy.captured_amount,
             "currency": payment_dummy.currency,
         },
-        **get_site_context_payload(site_settings.site),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
     }
     notifications.send_payment_confirmation(order_info, manager)
     mocked_notify.assert_called_once_with(
@@ -342,7 +347,8 @@ def test_send_email_order_confirmation(mocked_notify, order, site_settings):
     expected_payload = {
         "order": get_default_order_payload(order, redirect_url),
         "recipient_email": order.get_customer_email(),
-        **get_site_context_payload(site_settings.site),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
     }
     mocked_notify.assert_called_once_with(
         NotifyEventType.ORDER_CONFIRMATION,
@@ -364,7 +370,8 @@ def test_send_email_order_confirmation_for_cc(
     expected_payload = {
         "order": get_default_order_payload(order_with_lines_for_cc, redirect_url),
         "recipient_email": order_with_lines_for_cc.get_customer_email(),
-        **get_site_context_payload(site_settings.site),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
     }
     mocked_notify.assert_called_once_with(
         NotifyEventType.ORDER_CONFIRMATION,
@@ -378,7 +385,7 @@ def test_send_email_order_confirmation_for_cc(
 def test_send_confirmation_emails_without_addresses_for_payment(
     mocked_notify,
     site_settings,
-    anonymous_plugins,
+    info,
     digital_content,
     payment_dummy,
 ):
@@ -390,11 +397,11 @@ def test_send_confirmation_emails_without_addresses_for_payment(
     )
 
     line = add_variant_to_order(
-        order=order,
-        line_data=line_data,
-        user=None,
-        app=None,
-        manager=anonymous_plugins,
+        order,
+        line_data,
+        user=info.context.user,
+        app=info.context.app,
+        manager=info.context.plugins,
         site_settings=site_settings,
     )
     DigitalContentUrl.objects.create(content=digital_content, line=line)
@@ -405,7 +412,7 @@ def test_send_confirmation_emails_without_addresses_for_payment(
     order.save(update_fields=["shipping_address", "shipping_method", "billing_address"])
     order_info = fetch_order_info(order)
 
-    notifications.send_payment_confirmation(order_info, anonymous_plugins)
+    notifications.send_payment_confirmation(order_info, info.context.plugins)
 
     expected_payload = {
         "order": get_default_order_payload(order),
@@ -418,7 +425,8 @@ def test_send_confirmation_emails_without_addresses_for_payment(
             "captured_amount": payment_dummy.captured_amount,
             "currency": payment_dummy.currency,
         },
-        **get_site_context_payload(site_settings.site),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
     }
     mocked_notify.assert_called_once_with(
         NotifyEventType.ORDER_PAYMENT_CONFIRMATION,
@@ -429,11 +437,7 @@ def test_send_confirmation_emails_without_addresses_for_payment(
 
 @mock.patch("saleor.plugins.manager.PluginsManager.notify")
 def test_send_confirmation_emails_without_addresses_for_order(
-    mocked_notify,
-    order,
-    site_settings,
-    digital_content,
-    anonymous_plugins,
+    mocked_notify, order, site_settings, digital_content, info
 ):
 
     assert not order.lines.count()
@@ -444,11 +448,11 @@ def test_send_confirmation_emails_without_addresses_for_order(
     )
 
     line = add_variant_to_order(
-        order=order,
-        line_data=line_data,
-        user=None,
-        app=None,
-        manager=anonymous_plugins,
+        order,
+        line_data,
+        user=info.context.user,
+        app=info.context.app,
+        manager=info.context.plugins,
         site_settings=site_settings,
     )
     DigitalContentUrl.objects.create(content=digital_content, line=line)
@@ -461,12 +465,15 @@ def test_send_confirmation_emails_without_addresses_for_order(
 
     redirect_url = "https://www.example.com"
 
-    notifications.send_order_confirmation(order_info, redirect_url, anonymous_plugins)
+    notifications.send_order_confirmation(
+        order_info, redirect_url, info.context.plugins
+    )
 
     expected_payload = {
         "order": get_default_order_payload(order, redirect_url),
         "recipient_email": order.get_customer_email(),
-        **get_site_context_payload(site_settings.site),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
     }
 
     mocked_notify.assert_called_once_with(
@@ -564,9 +571,10 @@ def test_send_email_order_canceled_by_user(
     expected_payload = {
         "order": get_default_order_payload(order),
         "recipient_email": order.get_customer_email(),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
         "requester_user_id": to_global_id_or_none(staff_user),
         "requester_app_id": None,
-        **get_site_context_payload(site_settings.site),
     }
     mocked_notify.assert_called_once_with(
         NotifyEventType.ORDER_CANCELED,
@@ -587,9 +595,10 @@ def test_send_email_order_canceled_by_app(mocked_notify, order, site_settings, a
     expected_payload = {
         "order": get_default_order_payload(order),
         "recipient_email": order.get_customer_email(),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
         "requester_user_id": None,
         "requester_app_id": to_global_id_or_none(app),
-        **get_site_context_payload(site_settings.site),
     }
     mocked_notify.assert_called_once_with(
         NotifyEventType.ORDER_CANCELED,
@@ -619,7 +628,8 @@ def test_send_email_order_refunded_by_user(
         "amount": amount,
         "currency": order.currency,
         "recipient_email": order.get_customer_email(),
-        **get_site_context_payload(site_settings.site),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
     }
 
     mocked_notify.assert_called_once_with(
@@ -648,7 +658,8 @@ def test_send_email_order_refunded_by_app(mocked_notify, order, site_settings, a
         "amount": amount,
         "currency": order.currency,
         "recipient_email": order.get_customer_email(),
-        **get_site_context_payload(site_settings.site),
+        "site_name": "mirumee.com",
+        "domain": "mirumee.com",
     }
 
     mocked_notify.assert_called_once_with(
@@ -666,7 +677,9 @@ def test_get_default_images_payload(product_with_image):
     thumbnail_mock.name = "thumbnail_image.jpg"
 
     media = product_with_image.media.first()
-    Thumbnail.objects.create(product_media=media, image=thumbnail_mock, size=size)
+    thumbnail = Thumbnail.objects.create(
+        product_media=media, image=thumbnail_mock, size=size
+    )
 
     media_id = graphene.Node.to_global_id("ProductMedia", media.id)
 
@@ -675,5 +688,7 @@ def test_get_default_images_payload(product_with_image):
 
     # then
     images_payload = payload["first_image"]["original"]
+    assert images_payload[size] == thumbnail.image.url
     for th_size in THUMBNAIL_SIZES:
-        assert images_payload[th_size] == f"/thumbnail/{media_id}/{th_size}/"
+        if th_size != size:
+            assert images_payload[th_size] == f"/thumbnail/{media_id}/{th_size}/"

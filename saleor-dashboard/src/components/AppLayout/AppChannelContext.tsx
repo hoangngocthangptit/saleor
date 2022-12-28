@@ -35,10 +35,10 @@ const isValidChannel = (channelId: string, channelList?: ChannelFragment[]) => {
 
 export const AppChannelProvider: React.FC = ({ children }) => {
   const { setChannel } = useSaleorConfig();
-  const { authenticated, user } = useUser();
+  const { authenticated } = useUser();
   const [selectedChannel, setSelectedChannel] = useLocalStorage("channel", "");
   const { data: channelData, refetch } = useBaseChannelsQuery({
-    skip: !authenticated || !user,
+    skip: !authenticated,
   });
 
   const [isPickerActive, setPickerActive] = React.useState(false);

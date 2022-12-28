@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import graphene
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from ...channel import models as channel_models
 from ...core.permissions import ProductPermissions
@@ -16,7 +17,6 @@ from ..core.utils import (
     validate_required_string_field,
     validate_slug_and_generate_if_needed,
 )
-from ..plugins.dataloaders import load_plugin_manager
 from ..shipping.types import ShippingZone
 from .types import Warehouse, WarehouseCreateInput, WarehouseUpdateInput
 
@@ -108,8 +108,7 @@ class WarehouseCreate(WarehouseMixin, ModelMutation, I18nMixin):
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.warehouse_created, instance)
+        info.context.plugins.warehouse_created(instance)
 
 
 class WarehouseShippingZoneAssign(ModelMutation, I18nMixin):
@@ -269,8 +268,7 @@ class WarehouseUpdate(WarehouseMixin, ModelMutation, I18nMixin):
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.warehouse_updated, instance)
+        info.context.plugins.warehouse_updated(instance)
 
 
 class WarehouseDelete(ModelDeleteMutation):
@@ -286,8 +284,9 @@ class WarehouseDelete(ModelDeleteMutation):
         id = graphene.ID(description="ID of a warehouse to delete.", required=True)
 
     @classmethod
+    @traced_atomic_transaction()
     def perform_mutation(cls, _root, info, **data):
-        manager = load_plugin_manager(info.context)
+        manager = info.context.plugins
         node_id = data.get("id")
         model_type = cls.get_type_for_model()
         instance = cls.get_node_or_error(info, node_id, only_type=model_type)
@@ -300,28 +299,26 @@ class WarehouseDelete(ModelDeleteMutation):
         address = instance.address
 
         db_id = instance.id
-        with traced_atomic_transaction():
-            instance.delete()
+        instance.delete()
 
-            # After the instance is deleted, set its ID to the original database's
-            # ID so that the success response contains ID of the deleted object.
-            # Additionally, assign copy of deleted Address object to allow fetching
-            # address data on success response or in subscription webhook query.
-            instance.id = db_id
-            address.id = address_id
-            instance.address = address
+        # After the instance is deleted, set its ID to the original database's
+        # ID so that the success response contains ID of the deleted object.
+        # Additionally, assign copy of deleted Address object to allow fetching address
+        # data on success response or in subscription webhook query.
+        instance.id = db_id
+        address.id = address_id
+        instance.address = address
 
-            # Set `is_object_deleted` attribute to use it in Warehouse object type
-            # resolvers and for example decide if we should use Dataloader to resolve
-            # address or return object directly.
-            instance.is_object_deleted = True
+        # Set `is_object_deleted` attribute to use it in Warehouse object type
+        # resolvers and for example decide if we should use Dataloader to resolve
+        # address or return object directly.
+        instance.is_object_deleted = True
 
-            cls.post_save_action(info, instance, None)
-            for stock in stocks:
-                cls.call_event(manager.product_variant_out_of_stock, stock)
+        cls.post_save_action(info, instance, None)
+        for stock in stocks:
+            transaction.on_commit(lambda: manager.product_variant_out_of_stock(stock))
         return cls.success_response(instance)
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.warehouse_deleted, instance)
+        transaction.on_commit(lambda: info.context.plugins.warehouse_deleted(instance))

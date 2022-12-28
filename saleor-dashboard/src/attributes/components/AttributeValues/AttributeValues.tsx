@@ -1,4 +1,10 @@
-import { Card, TableCell, TableFooter, TableHead } from "@material-ui/core";
+import {
+  Card,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import { Button } from "@saleor/components/Button";
 import CardTitle from "@saleor/components/CardTitle";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
@@ -8,7 +14,6 @@ import {
   SortableTableRow,
 } from "@saleor/components/SortableTable";
 import TablePagination from "@saleor/components/TablePagination";
-import TableRowLink from "@saleor/components/TableRowLink";
 import {
   AttributeInputTypeEnum,
   AttributeValueFragment,
@@ -125,7 +130,7 @@ const AttributeValues: React.FC<AttributeValuesProps> = ({
       />
       <ResponsiveTable>
         <TableHead>
-          <TableRowLink>
+          <TableRow>
             <TableCell className={classes.columnDrag} />
             {isSwatch && (
               <TableCell className={classes.columnSwatch}>
@@ -151,10 +156,10 @@ const AttributeValues: React.FC<AttributeValuesProps> = ({
               />
             </TableCell>
             <TableCell className={classes.iconCell} />
-          </TableRowLink>
+          </TableRow>
         </TableHead>
         <TableFooter>
-          <TableRowLink>
+          <TableRow>
             <TablePagination
               colSpan={numberOfColumns}
               hasNextPage={pageInfo && !disabled ? pageInfo.hasNextPage : false}
@@ -166,7 +171,7 @@ const AttributeValues: React.FC<AttributeValuesProps> = ({
               settings={settings}
               onUpdateListSettings={onUpdateListSettings}
             />
-          </TableRowLink>
+          </TableRow>
         </TableFooter>
         <SortableTableBody onSortEnd={onValueReorder}>
           {renderCollection(
@@ -206,7 +211,7 @@ const AttributeValues: React.FC<AttributeValuesProps> = ({
               </SortableTableRow>
             ),
             () => (
-              <TableRowLink>
+              <TableRow>
                 <TableCell colSpan={numberOfColumns}>
                   <FormattedMessage
                     id="g5zIpS"
@@ -214,7 +219,7 @@ const AttributeValues: React.FC<AttributeValuesProps> = ({
                     description="No attribute values found"
                   />
                 </TableCell>
-              </TableRowLink>
+              </TableRow>
             ),
           )}
         </SortableTableBody>

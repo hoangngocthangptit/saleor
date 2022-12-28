@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 import django_filters
 import graphene
 import pytest
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
@@ -30,7 +31,6 @@ from ..utils import (
     get_duplicated_values,
     get_filename_from_url,
     is_image_mimetype,
-    is_supported_image_mimetype,
     snake_to_camel_case,
     validate_image_file,
     validate_image_url,
@@ -322,25 +322,6 @@ def test_validate_image_file_invalid_file_extension():
     )
 
 
-def test_validate_image_file_file_extension_not_supported_by_thumbnails():
-    # given
-    img_data = BytesIO()
-    image = Image.new("RGB", size=(1, 1))
-    image.save(img_data, format="JPEG")
-    img = SimpleUploadedFile("product.pxr", img_data.getvalue(), "image/jpeg")
-    field = "image"
-
-    # when
-    with pytest.raises(ValidationError) as exc:
-        validate_image_file(img, field, ProductErrorCode)
-
-    # then
-    assert (
-        exc.value.args[0][field].message
-        == "Invalid file extension. Image file required."
-    )
-
-
 def test_get_filename_from_url_unique():
     # given
     file_format = "jpg"
@@ -373,28 +354,6 @@ def test_is_image_mimetype_invalid_mimetype():
 
     # when
     result = is_image_mimetype(invalid_mimetype)
-
-    # then
-    assert not result
-
-
-def test_is_supported_image_mimetype_valid_mimetype():
-    # given
-    valid_mimetype = "image/jpeg"
-
-    # when
-    result = is_supported_image_mimetype(valid_mimetype)
-
-    # then
-    assert result
-
-
-def test_is_supported_image_mimetype_invalid_mimetype():
-    # given
-    invalid_mimetype = "application/javascript"
-
-    # when
-    result = is_supported_image_mimetype(invalid_mimetype)
 
     # then
     assert not result
@@ -508,6 +467,12 @@ def test_requestor_is_superuser_for_superuser(superuser):
 
 def test_requestor_is_superuser_for_app(app):
     result = requestor_is_superuser(app)
+    assert result is False
+
+
+def test_requestor_is_superuser_for_anonymous_user():
+    user = AnonymousUser()
+    result = requestor_is_superuser(user)
     assert result is False
 
 

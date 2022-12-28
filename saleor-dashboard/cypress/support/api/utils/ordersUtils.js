@@ -130,24 +130,17 @@ export function purchaseProductWithPromoCode({
 
 export function createReadyToFulfillOrder({
   customerId,
-  shippingMethod,
+  shippingMethodId,
   channelId,
   variantsList,
   address,
 }) {
   let order;
   return orderRequest
-    .createDraftOrder({ customerId, channelId, address })
+    .createDraftOrder({ customerId, shippingMethodId, channelId, address })
     .then(orderResp => {
       order = orderResp;
       assignVariantsToOrder(order, variantsList);
-    })
-    .then(orderResp => {
-      shippingMethod = getShippingMethodIdFromCheckout(
-        orderResp.order,
-        shippingMethod.name,
-      );
-      orderRequest.addShippingMethod(order.id, shippingMethod);
     })
     .then(() => orderRequest.completeOrder(order.id))
     .then(() => orderRequest.markOrderAsPaid(order.id));
@@ -155,7 +148,7 @@ export function createReadyToFulfillOrder({
 
 export function createFulfilledOrder({
   customerId,
-  shippingMethod,
+  shippingMethodId,
   channelId,
   variantsList,
   address,
@@ -164,7 +157,7 @@ export function createFulfilledOrder({
 }) {
   return createReadyToFulfillOrder({
     customerId,
-    shippingMethod,
+    shippingMethodId,
     channelId,
     variantsList,
     address,
@@ -180,24 +173,17 @@ export function createFulfilledOrder({
 
 export function createOrder({
   customerId,
-  shippingMethod,
+  shippingMethodId,
   channelId,
   variantsList,
   address,
 }) {
   let order;
   return orderRequest
-    .createDraftOrder({ customerId, channelId, address })
+    .createDraftOrder({ customerId, shippingMethodId, channelId, address })
     .then(orderResp => {
       order = orderResp;
       assignVariantsToOrder(order, variantsList);
-    })
-    .then(orderResp => {
-      shippingMethod = getShippingMethodIdFromCheckout(
-        orderResp.order,
-        shippingMethod.name,
-      );
-      orderRequest.addShippingMethod(order.id, shippingMethod);
     })
     .then(() => orderRequest.completeOrder(order.id))
     .then(() => order);

@@ -93,13 +93,11 @@ describe("As a staff user I want to manage apps", () => {
 
   it(
     "should be able to create app. TC: SALEOR_3001",
-    { tags: ["@app", "@allEnv", "@stable", "@oldRelease"] },
+    { tags: ["@app", "@allEnv", "@stable"] },
     () => {
       const randomAppName = `${startsWith}${faker.datatype.number()}`;
 
       cy.visit(urlList.apps)
-        .get(APPS_LIST.webhookAndEventsTab)
-        .click()
         .get(APPS_LIST.createLocalAppButton)
         .click()
         .get(APP_DETAILS.nameInput)

@@ -72,11 +72,6 @@ ALLOWED_CLIENT_HOSTS = get_list(ALLOWED_CLIENT_HOSTS)
 
 INTERNAL_IPS = get_list(os.environ.get("INTERNAL_IPS", "127.0.0.1"))
 
-# Maximum time in seconds Django can keep the database connections opened.
-# Set the value to 0 to disable connection persistence, database connections
-# will be closed after each request.
-DB_CONN_MAX_AGE = int(os.environ.get("DB_CONN_MAX_AGE", 600))
-
 DATABASE_CONNECTION_DEFAULT_NAME = "default"
 # TODO: For local envs will be activated in separate PR.
 # We need to update docs an saleor platform.
@@ -85,14 +80,13 @@ DATABASE_CONNECTION_REPLICA_NAME = "default"
 
 DATABASES = {
     DATABASE_CONNECTION_DEFAULT_NAME: dj_database_url.config(
-        default="postgres://saleor:saleor@localhost:5432/saleor",
-        conn_max_age=DB_CONN_MAX_AGE,
+        default="postgres://saleor:saleor@localhost:5432/saleor", conn_max_age=600
     ),
     # TODO: We need to add read only user to saleor platfrom, and we need to update
     # docs.
     # DATABASE_CONNECTION_REPLICA_NAME: dj_database_url.config(
     #     default="postgres://saleor_read_only:saleor@localhost:5432/saleor",
-    #     conn_max_age=DB_CONN_MAX_AGE,
+    #     conn_max_age=600,
     # ),
 }
 
@@ -207,7 +201,10 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.common.CommonMiddleware",
     "saleor.core.middleware.request_time",
+    "saleor.core.middleware.discounts",
     "saleor.core.middleware.google_analytics",
+    "saleor.core.middleware.site",
+    "saleor.core.middleware.plugins",
     "saleor.core.middleware.jwt_refresh_token_middleware",
 ]
 
@@ -244,7 +241,6 @@ INSTALLED_APPS = [
     "saleor.warehouse",
     "saleor.webhook",
     "saleor.app",
-    "saleor.tax",
     "saleor.thumbnail",
     "saleor.schedulers",
     # External apps
@@ -720,11 +716,6 @@ if (
 # for getting response from the server.
 WEBHOOK_TIMEOUT = 10
 WEBHOOK_SYNC_TIMEOUT = 20
-
-# Since we split checkout complete logic into two separate transactions, in order to
-# mimic stock lock, we apply short reservation for the stocks. The value represents
-# time of the reservation in seconds.
-RESERVE_DURATION = 45
 
 # Initialize a simple and basic Jaeger Tracing integration
 # for open-tracing if enabled.

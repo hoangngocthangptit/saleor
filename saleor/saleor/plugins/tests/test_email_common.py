@@ -3,11 +3,11 @@ from unittest.mock import patch
 import pytest
 from django.core.exceptions import ValidationError
 
-from ..email_common import (
+from saleor.plugins.email_common import (
     DEFAULT_EMAIL_CONFIGURATION,
     validate_default_email_configuration,
 )
-from ..error_codes import PluginErrorCode
+from saleor.plugins.error_codes import PluginErrorCode
 
 
 @pytest.mark.parametrize(

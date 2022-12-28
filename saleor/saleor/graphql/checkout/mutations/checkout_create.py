@@ -11,13 +11,11 @@ from ....product import models as product_models
 from ....warehouse.reservations import get_reservation_length, is_reservation_enabled
 from ...account.i18n import I18nMixin
 from ...account.types import AddressInput
-from ...app.dataloaders import load_app
 from ...channel.utils import clean_channel
 from ...core.descriptions import (
     ADDED_IN_31,
     ADDED_IN_35,
     ADDED_IN_36,
-    ADDED_IN_38,
     DEPRECATED_IN_3X_FIELD,
     PREVIEW_FEATURE,
 )
@@ -26,9 +24,7 @@ from ...core.mutations import ModelMutation
 from ...core.scalars import PositiveDecimal
 from ...core.types import CheckoutError, NonNullList
 from ...core.validators import validate_variants_available_in_channel
-from ...plugins.dataloaders import load_plugin_manager
 from ...product.types import ProductVariant
-from ...site.dataloaders import get_site_promise
 from ..types import Checkout
 from .utils import (
     check_lines_quantity,
@@ -42,8 +38,6 @@ from .utils import (
 if TYPE_CHECKING:
     from ....account.models import Address
     from .utils import CheckoutLineData
-
-from ...meta.mutations import MetadataInput
 
 
 class CheckoutAddressValidationRules(graphene.InputObjectType):
@@ -110,11 +104,6 @@ class CheckoutLineInput(graphene.InputObjectType):
             "by skipping the matching logic. " + ADDED_IN_36 + PREVIEW_FEATURE
         ),
     )
-    metadata = NonNullList(
-        MetadataInput,
-        description=("Fields required to update the object's metadata." + ADDED_IN_38),
-        required=False,
-    )
 
 
 class CheckoutCreateInput(graphene.InputObjectType):
@@ -179,9 +168,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
     def clean_checkout_lines(
         cls, info, lines, country, channel
     ) -> Tuple[List[product_models.ProductVariant], List["CheckoutLineData"]]:
-        app = load_app(info.context)
-        site = get_site_promise(info.context).get()
-        check_permissions_for_custom_prices(app, lines)
+        check_permissions_for_custom_prices(info.context.app, lines)
         variant_ids = [line["variant_id"] for line in lines]
         variants = cls.get_nodes_or_error(
             variant_ids,
@@ -210,8 +197,8 @@ class CheckoutCreate(ModelMutation, I18nMixin):
             quantities,
             country,
             channel.slug,
-            site.settings.limit_quantity_per_checkout,
-            check_reservations=is_reservation_enabled(site.settings),
+            info.context.site.settings.limit_quantity_per_checkout,
+            check_reservations=is_reservation_enabled(info.context.site.settings),
         )
         return variants, checkout_lines_data
 
@@ -284,7 +271,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
             )
 
         # Use authenticated user's email as default email
-        if user:
+        if user.is_authenticated:
             email = data.pop("email", None)
             cleaned_input["email"] = email or user.email
 
@@ -297,49 +284,46 @@ class CheckoutCreate(ModelMutation, I18nMixin):
         return cleaned_input
 
     @classmethod
+    @traced_atomic_transaction()
     def save(cls, info, instance: models.Checkout, cleaned_input):
-        with traced_atomic_transaction():
-            # Create the checkout object
-            instance.save()
+        # Create the checkout object
+        instance.save()
 
-            # Set checkout country
-            country = cleaned_input["country"]
-            instance.set_country(country)
-            # Create checkout lines
-            channel = cleaned_input["channel"]
-            variants = cleaned_input.get("variants")
-            checkout_lines_data = cleaned_input.get("lines_data")
-            if variants and checkout_lines_data:
-                site = get_site_promise(info.context).get()
-                add_variants_to_checkout(
-                    instance,
-                    variants,
-                    checkout_lines_data,
-                    channel,
-                    site.settings.limit_quantity_per_checkout,
-                    reservation_length=get_reservation_length(
-                        site=site, user=info.context.user
-                    ),
-                )
+        # Set checkout country
+        country = cleaned_input["country"]
+        instance.set_country(country)
+        # Create checkout lines
+        channel = cleaned_input["channel"]
+        variants = cleaned_input.get("variants")
+        checkout_lines_data = cleaned_input.get("lines_data")
+        if variants and checkout_lines_data:
+            add_variants_to_checkout(
+                instance,
+                variants,
+                checkout_lines_data,
+                channel,
+                info.context.site.settings.limit_quantity_per_checkout,
+                reservation_length=get_reservation_length(info.context),
+            )
 
-            # Save addresses
-            shipping_address = cleaned_input.get("shipping_address")
-            if shipping_address and instance.is_shipping_required():
-                shipping_address.save()
-                instance.shipping_address = shipping_address.get_copy()
+        # Save addresses
+        shipping_address = cleaned_input.get("shipping_address")
+        if shipping_address and instance.is_shipping_required():
+            shipping_address.save()
+            instance.shipping_address = shipping_address.get_copy()
 
-            billing_address = cleaned_input.get("billing_address")
-            if billing_address:
-                billing_address.save()
-                instance.billing_address = billing_address.get_copy()
+        billing_address = cleaned_input.get("billing_address")
+        if billing_address:
+            billing_address.save()
+            instance.billing_address = billing_address.get_copy()
 
-            instance.save()
+        instance.save()
 
     @classmethod
     def get_instance(cls, info, **data):
         instance = super().get_instance(info, **data)
         user = info.context.user
-        if user:
+        if user.is_authenticated:
             instance.user = user
         return instance
 
@@ -350,7 +334,6 @@ class CheckoutCreate(ModelMutation, I18nMixin):
         if channel:
             data["input"]["channel"] = channel
         response = super().perform_mutation(_root, info, **data)
-        manager = load_plugin_manager(info.context)
-        cls.call_event(manager.checkout_created, response.checkout)
+        info.context.plugins.checkout_created(response.checkout)
         response.created = True
         return response

@@ -3,11 +3,12 @@ import {
   find,
   insertNode,
   removeNode,
+  TreeItem,
 } from "react-sortable-tree";
 
-import { getDiff, MenuTreeItem } from "./tree";
+import { getDiff } from "./tree";
 
-const originalTree: MenuTreeItem[] = [
+const originalTree: TreeItem[] = [
   {
     children: [
       { children: [], expanded: true, id: "0jewelry", title: "Jewelry" },
@@ -26,7 +27,7 @@ function getNodeKey(node: any) {
 }
 
 function moveNode(
-  tree: MenuTreeItem[],
+  tree: TreeItem[],
   src: string,
   target: string,
   asChild: boolean,
@@ -68,7 +69,7 @@ function moveNode(
         treeData: treeAfterRemoval,
       }).treeData;
 
-  return treeAfterInsertion as MenuTreeItem[];
+  return treeAfterInsertion as TreeItem[];
 }
 
 describe("Properly computes diffs", () => {

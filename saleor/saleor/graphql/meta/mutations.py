@@ -44,17 +44,18 @@ def _save_instance(instance, metadata_field: str):
         instance.save(update_fields=fields)
     except DatabaseError as e:
         msg = (
-            "Cannot update metadata for instance: %(instance)s. "
-            "Updating not existing object. Details: %(details)s."
+            "Cannot update metadata for instance: %s. "
+            "Updating not existing object. "
+            "Details: %s.",
+            instance,
+            str(e),
         )
-        params = {
-            "instance": str(instance),
-            "details": str(e),
-        }
+        logger.warning(msg)
         raise ValidationError(
             {
                 "metadata": ValidationError(
-                    msg, code=MetadataErrorCode.NOT_FOUND.value, params=params
+                    msg,
+                    code=MetadataErrorCode.NOT_FOUND.value,
                 )
             }
         )

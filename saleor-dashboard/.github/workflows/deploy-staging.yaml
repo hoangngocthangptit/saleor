@@ -23,7 +23,6 @@ jobs:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       MARKETPLACE_URL: "https://apps.saleor.io/"
-      SALEOR_APPS_ENDPOINT: "https://apps.saleor.io/api/saleor-apps"
       VERSION: ${{ github.event.inputs.git_ref || github.ref_name }}
       IS_CLOUD_INSTANCE: true
     steps:
@@ -37,11 +36,6 @@ jobs:
           set -x
           environment=$(echo $VERSION | sed -n 's#\([0-9]\+\).\([0-9]\+\).*#saleor-staging-v\1\2#p')
           echo "ENVIRONMENT=${environment}" >> $GITHUB_ENV
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: ".nvmrc"
 
       - name: Package
         timeout-minutes: 15

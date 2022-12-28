@@ -30,10 +30,8 @@ class BaseProductAttributesByProductTypeIdLoader(DataLoader):
             self.extra_fields = []
 
         requestor = get_user_or_app_from_context(self.context)
-        if (
-            requestor
-            and requestor.is_active
-            and requestor.has_perm(ProductPermissions.MANAGE_PRODUCTS)
+        if requestor.is_active and requestor.has_perm(
+            ProductPermissions.MANAGE_PRODUCTS
         ):
             qs = self.model_name.objects.using(self.database_connection_name).all()
         else:
@@ -96,10 +94,8 @@ class AttributeProductsByProductTypeIdLoader(DataLoader):
 
     def batch_load(self, keys):
         requestor = get_user_or_app_from_context(self.context)
-        if (
-            requestor
-            and requestor.is_active
-            and requestor.has_perm(ProductPermissions.MANAGE_PRODUCTS)
+        if requestor.is_active and requestor.has_perm(
+            ProductPermissions.MANAGE_PRODUCTS
         ):
             qs = AttributeProduct.objects.using(self.database_connection_name).all()
         else:
@@ -120,10 +116,8 @@ class AttributeVariantsByProductTypeIdLoader(DataLoader):
 
     def batch_load(self, keys):
         requestor = get_user_or_app_from_context(self.context)
-        if (
-            requestor
-            and requestor.is_active
-            and requestor.has_perm(ProductPermissions.MANAGE_PRODUCTS)
+        if requestor.is_active and requestor.has_perm(
+            ProductPermissions.MANAGE_PRODUCTS
         ):
             qs = AttributeVariant.objects.using(self.database_connection_name).all()
         else:
@@ -144,10 +138,8 @@ class AssignedProductAttributesByProductIdLoader(DataLoader):
 
     def batch_load(self, keys):
         requestor = get_user_or_app_from_context(self.context)
-        if (
-            requestor
-            and requestor.is_active
-            and requestor.has_perm(ProductPermissions.MANAGE_PRODUCTS)
+        if requestor.is_active and requestor.has_perm(
+            ProductPermissions.MANAGE_PRODUCTS
         ):
             qs = AssignedProductAttribute.objects.using(
                 self.database_connection_name
@@ -170,10 +162,8 @@ class AssignedVariantAttributesByProductVariantId(DataLoader):
 
     def batch_load(self, keys):
         requestor = get_user_or_app_from_context(self.context)
-        if (
-            requestor
-            and requestor.is_active
-            and requestor.has_perm(ProductPermissions.MANAGE_PRODUCTS)
+        if requestor.is_active and requestor.has_perm(
+            ProductPermissions.MANAGE_PRODUCTS
         ):
             qs = AssignedVariantAttribute.objects.using(
                 self.database_connection_name

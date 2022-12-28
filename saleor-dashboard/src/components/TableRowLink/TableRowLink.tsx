@@ -7,12 +7,12 @@ import { Link } from "react-router-dom";
 
 type MaterialTableRowPropsType = TableRowTypeMap["props"];
 
-export interface TableRowLinkProps extends MaterialTableRowPropsType {
+export interface TableRowLinkProps
+  extends Omit<MaterialTableRowPropsType, "onClick"> {
   children: React.ReactNode;
   href?: string;
   className?: string;
   linkClassName?: string;
-  onClick?: () => void;
 }
 
 const useStyles = makeStyles(
@@ -29,21 +29,16 @@ const TableRowLink = ({
   href,
   children,
   linkClassName,
-  onClick,
   ...props
 }: TableRowLinkProps) => {
   const classes = useStyles();
 
   if (!href || isExternalURL(href)) {
-    return (
-      <TableRow hover={!!onClick} onClick={onClick} {...props}>
-        {children}
-      </TableRow>
-    );
+    return <TableRow {...props}>{children}</TableRow>;
   }
 
   return (
-    <TableRow hover={true} onClick={onClick} {...props}>
+    <TableRow {...props}>
       <Link className={clsx(classes.link, linkClassName)} to={href}>
         {children}
       </Link>

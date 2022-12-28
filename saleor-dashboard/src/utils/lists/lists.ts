@@ -1,4 +1,4 @@
-type List<TData> = readonly TData[];
+type List<TData> = TData[];
 type Compare<TData> = (a: TData, b: TData) => boolean;
 
 export function isSelected<TData>(

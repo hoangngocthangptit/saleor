@@ -5,7 +5,6 @@ from ...discount import models
 from ...discount.utils import fetch_catalogue_info
 from ..core.mutations import ModelBulkDeleteMutation
 from ..core.types import DiscountError, NonNullList
-from ..plugins.dataloaders import load_plugin_manager
 from .mutations.utils import convert_catalogue_info_to_global_ids
 from .types import Sale, Voucher
 
@@ -31,9 +30,8 @@ class SaleBulkDelete(ModelBulkDeleteMutation):
             for sale in list(queryset)
         ]
         queryset.delete()
-        manager = load_plugin_manager(info.context)
         for sale, previous_catalogue in sales_and_catalogues:
-            manager.sale_deleted(sale, previous_catalogue)
+            info.context.plugins.sale_deleted(sale, previous_catalogue)
 
 
 class VoucherBulkDelete(ModelBulkDeleteMutation):
@@ -54,6 +52,5 @@ class VoucherBulkDelete(ModelBulkDeleteMutation):
     def bulk_action(cls, info, queryset):
         vouchers = list(queryset)
         queryset.delete()
-        manager = load_plugin_manager(info.context)
         for voucher in vouchers:
-            manager.voucher_deleted(voucher)
+            info.context.plugins.voucher_deleted(voucher)

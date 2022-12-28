@@ -1,10 +1,4 @@
-import {
-  extensionMountPoints,
-  mapToMenuItemsForCustomerDetails,
-  useExtensions,
-} from "@saleor/apps/useExtensions";
 import { Backlink } from "@saleor/components/Backlink";
-import CardMenu from "@saleor/components/CardMenu/CardMenu";
 import { CardSpacer } from "@saleor/components/CardSpacer";
 import Container from "@saleor/components/Container";
 import Form from "@saleor/components/Form";
@@ -84,15 +78,6 @@ const CustomerDetailsPage: React.FC<CustomerDetailsPageProps> = ({
     makeChangeHandler: makeMetadataChangeHandler,
   } = useMetadataChangeTrigger();
 
-  const { CUSTOMER_DETAILS_MORE_ACTIONS } = useExtensions(
-    extensionMountPoints.CUSTOMER_DETAILS,
-  );
-
-  const extensionMenuItems = mapToMenuItemsForCustomerDetails(
-    CUSTOMER_DETAILS_MORE_ACTIONS,
-    customerId,
-  );
-
   return (
     <Form
       confirmLeave
@@ -108,14 +93,7 @@ const CustomerDetailsPage: React.FC<CustomerDetailsPageProps> = ({
             <Backlink href={customerListUrl()}>
               {intl.formatMessage(sectionNames.customers)}
             </Backlink>
-            <PageHeader
-              title={getUserName(customer, true)}
-              cardMenu={
-                extensionMenuItems.length > 0 && (
-                  <CardMenu outlined menuItems={extensionMenuItems} />
-                )
-              }
-            />
+            <PageHeader title={getUserName(customer, true)} />
             <Grid>
               <div>
                 <CustomerDetails

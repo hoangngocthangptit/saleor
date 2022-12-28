@@ -3,6 +3,7 @@ import {
   CardContent,
   TableBody,
   TableCell,
+  TableRow,
   Typography,
 } from "@material-ui/core";
 import CardTitle from "@saleor/components/CardTitle";
@@ -12,7 +13,6 @@ import RadioGroupField from "@saleor/components/RadioGroupField";
 import ResponsiveTable from "@saleor/components/ResponsiveTable";
 import Skeleton from "@saleor/components/Skeleton";
 import TableHead from "@saleor/components/TableHead";
-import TableRowLink from "@saleor/components/TableRowLink";
 import TextFieldWithChoice from "@saleor/components/TextFieldWithChoice";
 import { ChannelInput } from "@saleor/discounts/handlers";
 import { DiscountTypeEnum } from "@saleor/discounts/types";
@@ -103,7 +103,7 @@ const VoucherValue: React.FC<VoucherValueProps> = props => {
                     id => id === listing.id,
                   );
                   return (
-                    <TableRowLink key={listing?.id || `skeleton-${index}`}>
+                    <TableRow key={listing?.id || `skeleton-${index}`}>
                       <TableCell>
                         <Typography>{listing?.name || <Skeleton />}</Typography>
                       </TableCell>
@@ -150,18 +150,18 @@ const VoucherValue: React.FC<VoucherValueProps> = props => {
                           <Skeleton />
                         )}
                       </TableCell>
-                    </TableRowLink>
+                    </TableRow>
                   );
                 },
                 () => (
-                  <TableRowLink>
+                  <TableRow>
                     <TableCell colSpan={numberOfColumns}>
                       <FormattedMessage
                         id="/glQgs"
                         defaultMessage="No channels found"
                       />
                     </TableCell>
-                  </TableRowLink>
+                  </TableRow>
                 ),
               )}
             </TableBody>

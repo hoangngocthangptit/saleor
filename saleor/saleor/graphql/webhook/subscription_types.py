@@ -1,4 +1,5 @@
 import graphene
+from django.contrib.auth.models import AnonymousUser
 from django.utils import timezone
 from graphene import AbstractType, ObjectType, Union
 from rx import Observable
@@ -30,7 +31,6 @@ from ..core.descriptions import (
     ADDED_IN_35,
     ADDED_IN_36,
     ADDED_IN_37,
-    ADDED_IN_38,
     PREVIEW_FEATURE,
 )
 from ..core.scalars import PositiveDecimal
@@ -103,7 +103,7 @@ class Event(graphene.Interface):
 
     @staticmethod
     def resolve_issuing_principal(_root, info):
-        if not info.context.requestor:
+        if isinstance(info.context.requestor, AnonymousUser):
             return None
         return info.context.requestor
 
@@ -404,14 +404,6 @@ class OrderCancelled(ObjectType, OrderBase):
         )
 
 
-class OrderMetadataUpdated(ObjectType, OrderBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when order metadata is updated." + ADDED_IN_38 + PREVIEW_FEATURE
-        )
-
-
 class DraftOrderCreated(ObjectType, OrderBase):
     class Meta:
         interfaces = (Event,)
@@ -480,16 +472,6 @@ class GiftCardStatusChanged(ObjectType, GiftCardBase):
         description = (
             "Event sent when gift card status has changed."
             + ADDED_IN_32
-            + PREVIEW_FEATURE
-        )
-
-
-class GiftCardMetadataUpdated(ObjectType, GiftCardBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when gift card metadata is updated."
-            + ADDED_IN_38
             + PREVIEW_FEATURE
         )
 
@@ -616,16 +598,6 @@ class ProductDeleted(ObjectType, ProductBase):
         )
 
 
-class ProductMetadataUpdated(ObjectType, ProductBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when product metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
-        )
-
-
 class ProductVariantBase(AbstractType):
     product_variant = graphene.Field(
         "saleor.graphql.product.types.ProductVariant",
@@ -667,16 +639,6 @@ class ProductVariantDeleted(ObjectType, ProductVariantBase):
         description = (
             "Event sent when product variant is deleted."
             + ADDED_IN_32
-            + PREVIEW_FEATURE
-        )
-
-
-class ProductVariantMetadataUpdated(ObjectType, ProductVariantBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when product variant metadata is updated."
-            + ADDED_IN_38
             + PREVIEW_FEATURE
         )
 
@@ -865,16 +827,6 @@ class FulfillmentApproved(ObjectType, FulfillmentBase):
         )
 
 
-class FulfillmentMetadataUpdated(ObjectType, FulfillmentBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when fulfillment metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
-        )
-
-
 class UserBase(AbstractType):
     user = graphene.Field(
         "saleor.graphql.account.types.User",
@@ -902,16 +854,6 @@ class CustomerUpdated(ObjectType, UserBase):
         interfaces = (Event,)
         description = (
             "Event sent when customer user is updated." + ADDED_IN_32 + PREVIEW_FEATURE
-        )
-
-
-class CustomerMetadataUpdated(ObjectType, UserBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when customer user metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
         )
 
 
@@ -954,16 +896,6 @@ class CollectionDeleted(ObjectType, CollectionBase):
         )
 
 
-class CollectionMetadataUpdated(ObjectType, CollectionBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when collection metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
-        )
-
-
 class CheckoutBase(AbstractType):
     checkout = graphene.Field(
         "saleor.graphql.checkout.types.Checkout",
@@ -989,16 +921,6 @@ class CheckoutUpdated(ObjectType, CheckoutBase):
         interfaces = (Event,)
         description = (
             "Event sent when checkout is updated." + ADDED_IN_32 + PREVIEW_FEATURE
-        )
-
-
-class CheckoutMetadataUpdated(ObjectType, CheckoutBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when checkout metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
         )
 
 
@@ -1205,16 +1127,6 @@ class ShippingZoneDeleted(ObjectType, ShippingZoneBase):
         )
 
 
-class ShippingZoneMetadataUpdated(ObjectType, ShippingZoneBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when shipping zone metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
-        )
-
-
 class StaffCreated(ObjectType, UserBase):
     class Meta:
         interfaces = (Event,)
@@ -1286,26 +1198,6 @@ class TransactionActionRequest(ObjectType):
         _, transaction_action_data = root
         transaction_action_data: TransactionActionData
         return transaction_action_data
-
-
-class TransactionItemMetadataUpdated(ObjectType):
-    transaction = graphene.Field(
-        TransactionItem,
-        description="Look up a transaction." + PREVIEW_FEATURE,
-    )
-
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when transaction item metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
-        )
-
-    @staticmethod
-    def resolve_transaction(root, _info):
-        _, transaction_item = root
-        return transaction_item
 
 
 class TranslationTypes(Union):
@@ -1386,16 +1278,6 @@ class VoucherDeleted(ObjectType, VoucherBase):
         interfaces = (Event,)
         description = (
             "Event sent when voucher is deleted." + ADDED_IN_34 + PREVIEW_FEATURE
-        )
-
-
-class VoucherMetadataUpdated(ObjectType, VoucherBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when voucher metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
         )
 
 
@@ -1485,24 +1367,6 @@ class ShippingListMethodsForCheckout(ObjectType, CheckoutBase):
         )
 
 
-class CalculateTaxes(ObjectType):
-    tax_base = graphene.Field(
-        "saleor.graphql.core.types.taxes.TaxableObject", required=True
-    )
-
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Synchronous webhook for calculating checkout/order taxes."
-            + ADDED_IN_37
-            + PREVIEW_FEATURE
-        )
-
-    def resolve_tax_base(root, info):
-        _, tax_base = root
-        return tax_base
-
-
 class CheckoutFilterShippingMethods(ObjectType, CheckoutBase):
     shipping_methods = NonNullList(
         ShippingMethod,
@@ -1578,16 +1442,6 @@ class WarehouseDeleted(ObjectType, WarehouseBase):
         )
 
 
-class WarehouseMetadataUpdated(ObjectType, WarehouseBase):
-    class Meta:
-        interfaces = (Event,)
-        description = (
-            "Event sent when warehouse metadata is updated."
-            + ADDED_IN_38
-            + PREVIEW_FEATURE
-        )
-
-
 class Subscription(ObjectType):
     event = graphene.Field(
         Event,
@@ -1624,7 +1478,6 @@ WEBHOOK_TYPES_MAP = {
     WebhookEventAsyncType.GIFT_CARD_UPDATED: GiftCardUpdated,
     WebhookEventAsyncType.GIFT_CARD_DELETED: GiftCardDeleted,
     WebhookEventAsyncType.GIFT_CARD_STATUS_CHANGED: GiftCardStatusChanged,
-    WebhookEventAsyncType.GIFT_CARD_METADATA_UPDATED: GiftCardMetadataUpdated,
     WebhookEventAsyncType.MENU_CREATED: MenuCreated,
     WebhookEventAsyncType.MENU_UPDATED: MenuUpdated,
     WebhookEventAsyncType.MENU_DELETED: MenuDeleted,
@@ -1637,22 +1490,17 @@ WEBHOOK_TYPES_MAP = {
     WebhookEventAsyncType.ORDER_FULLY_PAID: OrderFullyPaid,
     WebhookEventAsyncType.ORDER_FULFILLED: OrderFulfilled,
     WebhookEventAsyncType.ORDER_CANCELLED: OrderCancelled,
-    WebhookEventAsyncType.ORDER_METADATA_UPDATED: OrderMetadataUpdated,
     WebhookEventAsyncType.DRAFT_ORDER_CREATED: DraftOrderCreated,
     WebhookEventAsyncType.DRAFT_ORDER_UPDATED: DraftOrderUpdated,
     WebhookEventAsyncType.DRAFT_ORDER_DELETED: DraftOrderDeleted,
     WebhookEventAsyncType.PRODUCT_CREATED: ProductCreated,
     WebhookEventAsyncType.PRODUCT_UPDATED: ProductUpdated,
     WebhookEventAsyncType.PRODUCT_DELETED: ProductDeleted,
-    WebhookEventAsyncType.PRODUCT_METADATA_UPDATED: ProductMetadataUpdated,
     WebhookEventAsyncType.PRODUCT_VARIANT_CREATED: ProductVariantCreated,
     WebhookEventAsyncType.PRODUCT_VARIANT_UPDATED: ProductVariantUpdated,
-    WebhookEventAsyncType.PRODUCT_VARIANT_OUT_OF_STOCK: ProductVariantOutOfStock,
-    WebhookEventAsyncType.PRODUCT_VARIANT_BACK_IN_STOCK: ProductVariantBackInStock,
+    WebhookEventAsyncType.PRODUCT_VARIANT_OUT_OF_STOCK: (ProductVariantOutOfStock),
+    WebhookEventAsyncType.PRODUCT_VARIANT_BACK_IN_STOCK: (ProductVariantBackInStock),
     WebhookEventAsyncType.PRODUCT_VARIANT_DELETED: ProductVariantDeleted,
-    WebhookEventAsyncType.PRODUCT_VARIANT_METADATA_UPDATED: (
-        ProductVariantMetadataUpdated
-    ),
     WebhookEventAsyncType.SALE_CREATED: SaleCreated,
     WebhookEventAsyncType.SALE_UPDATED: SaleUpdated,
     WebhookEventAsyncType.SALE_DELETED: SaleDeleted,
@@ -1663,17 +1511,13 @@ WEBHOOK_TYPES_MAP = {
     WebhookEventAsyncType.FULFILLMENT_CREATED: FulfillmentCreated,
     WebhookEventAsyncType.FULFILLMENT_CANCELED: FulfillmentCanceled,
     WebhookEventAsyncType.FULFILLMENT_APPROVED: FulfillmentApproved,
-    WebhookEventAsyncType.FULFILLMENT_METADATA_UPDATED: FulfillmentMetadataUpdated,
     WebhookEventAsyncType.CUSTOMER_CREATED: CustomerCreated,
     WebhookEventAsyncType.CUSTOMER_UPDATED: CustomerUpdated,
-    WebhookEventAsyncType.CUSTOMER_METADATA_UPDATED: CustomerMetadataUpdated,
     WebhookEventAsyncType.COLLECTION_CREATED: CollectionCreated,
     WebhookEventAsyncType.COLLECTION_UPDATED: CollectionUpdated,
     WebhookEventAsyncType.COLLECTION_DELETED: CollectionDeleted,
-    WebhookEventAsyncType.COLLECTION_METADATA_UPDATED: CollectionMetadataUpdated,
     WebhookEventAsyncType.CHECKOUT_CREATED: CheckoutCreated,
     WebhookEventAsyncType.CHECKOUT_UPDATED: CheckoutUpdated,
-    WebhookEventAsyncType.CHECKOUT_METADATA_UPDATED: CheckoutMetadataUpdated,
     WebhookEventAsyncType.PAGE_CREATED: PageCreated,
     WebhookEventAsyncType.PAGE_UPDATED: PageUpdated,
     WebhookEventAsyncType.PAGE_DELETED: PageDeleted,
@@ -1689,24 +1533,18 @@ WEBHOOK_TYPES_MAP = {
     WebhookEventAsyncType.SHIPPING_ZONE_CREATED: ShippingZoneCreated,
     WebhookEventAsyncType.SHIPPING_ZONE_UPDATED: ShippingZoneUpdated,
     WebhookEventAsyncType.SHIPPING_ZONE_DELETED: ShippingZoneDeleted,
-    WebhookEventAsyncType.SHIPPING_ZONE_METADATA_UPDATED: ShippingZoneMetadataUpdated,
     WebhookEventAsyncType.STAFF_CREATED: StaffCreated,
     WebhookEventAsyncType.STAFF_UPDATED: StaffUpdated,
     WebhookEventAsyncType.STAFF_DELETED: StaffDeleted,
     WebhookEventAsyncType.TRANSACTION_ACTION_REQUEST: TransactionActionRequest,
-    WebhookEventAsyncType.TRANSACTION_ITEM_METADATA_UPDATED: (
-        TransactionItemMetadataUpdated
-    ),
     WebhookEventAsyncType.TRANSLATION_CREATED: TranslationCreated,
     WebhookEventAsyncType.TRANSLATION_UPDATED: TranslationUpdated,
     WebhookEventAsyncType.VOUCHER_CREATED: VoucherCreated,
     WebhookEventAsyncType.VOUCHER_UPDATED: VoucherUpdated,
     WebhookEventAsyncType.VOUCHER_DELETED: VoucherDeleted,
-    WebhookEventAsyncType.VOUCHER_METADATA_UPDATED: VoucherMetadataUpdated,
     WebhookEventAsyncType.WAREHOUSE_CREATED: WarehouseCreated,
     WebhookEventAsyncType.WAREHOUSE_UPDATED: WarehouseUpdated,
     WebhookEventAsyncType.WAREHOUSE_DELETED: WarehouseDeleted,
-    WebhookEventAsyncType.WAREHOUSE_METADATA_UPDATED: WarehouseMetadataUpdated,
     WebhookEventSyncType.PAYMENT_AUTHORIZE: PaymentAuthorize,
     WebhookEventSyncType.PAYMENT_CAPTURE: PaymentCaptureEvent,
     WebhookEventSyncType.PAYMENT_REFUND: PaymentRefundEvent,
@@ -1721,6 +1559,4 @@ WEBHOOK_TYPES_MAP = {
     WebhookEventSyncType.SHIPPING_LIST_METHODS_FOR_CHECKOUT: (
         ShippingListMethodsForCheckout
     ),
-    WebhookEventSyncType.CHECKOUT_CALCULATE_TAXES: CalculateTaxes,
-    WebhookEventSyncType.ORDER_CALCULATE_TAXES: CalculateTaxes,
 }

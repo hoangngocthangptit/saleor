@@ -47,7 +47,7 @@ describe("As a staff user I want to navigate through shop using different permis
     if (key !== "all") {
       it(
         `should be able to navigate through shop as a staff member using ${key} permission. ${permissionsOptions[key].testCase}`,
-        { tags: ["@allEnv", "@navigation", "@stable", "@oldRelease"] },
+        { tags: ["@allEnv", "@navigation", "@stable"] },
         () => {
           const permissionOption = permissionsOptions[key];
           const permissions = permissionOption.permissions;
@@ -85,7 +85,7 @@ describe("As a staff user I want to navigate through shop using different permis
 
   it(
     `should be able to navigate through shop as a staff member using all permissions. ${permissionsOptions.all.testCase}`,
-    { tags: ["@critical", "@allEnv", "@navigation", "@stable", "@oldRelease"] },
+    { tags: ["@critical", "@allEnv", "@navigation", "@stable"] },
     () => {
       const permissionOption = permissionsOptions.all;
 

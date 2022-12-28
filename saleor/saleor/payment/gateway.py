@@ -2,6 +2,8 @@ import logging
 from decimal import Decimal
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Union
 
+from django.contrib.auth.models import AnonymousUser
+
 from ..account.models import User
 from ..app.models import App
 from ..core.prices import quantize_price

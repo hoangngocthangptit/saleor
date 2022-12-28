@@ -1,9 +1,27 @@
 import { Typography } from "@material-ui/core";
 import { Button } from "@saleor/components/Button";
 import Grid from "@saleor/components/Grid";
+import { makeStyles } from "@saleor/macaw-ui";
 import React from "react";
 
-import { useExtendedAttributeStyles } from "./styles";
+const useStyles = makeStyles(
+  theme => ({
+    attributeSection: {
+      "&:last-of-type": {
+        paddingBottom: 0,
+      },
+      padding: theme.spacing(2, 0),
+    },
+    attributeSectionButton: {
+      float: "right",
+    },
+    attributeSectionLabel: {
+      alignItems: "center",
+      display: "flex",
+    },
+  }),
+  { name: "ExtendedAttributeRow" },
+);
 
 interface ExtendedAttributeRowProps {
   label: string;
@@ -14,7 +32,7 @@ interface ExtendedAttributeRowProps {
 
 const ExtendedAttributeRow: React.FC<ExtendedAttributeRowProps> = props => {
   const { label, selectLabel, disabled, onSelect, children } = props;
-  const classes = useExtendedAttributeStyles(props);
+  const classes = useStyles(props);
 
   return (
     <>

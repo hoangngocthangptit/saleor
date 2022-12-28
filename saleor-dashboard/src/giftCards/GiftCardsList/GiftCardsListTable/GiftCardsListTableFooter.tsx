@@ -1,6 +1,5 @@
-import { TableFooter } from "@material-ui/core";
+import { TableFooter, TableRow } from "@material-ui/core";
 import TablePagination from "@saleor/components/TablePagination";
-import TableRowLink from "@saleor/components/TableRowLink";
 import usePaginator from "@saleor/hooks/usePaginator";
 import React from "react";
 
@@ -24,14 +23,14 @@ const GiftCardsListTableFooter: React.FC = () => {
 
   return (
     <TableFooter>
-      <TableRowLink>
+      <TableRow>
         <TablePagination
           {...paginationValues}
           settings={settings}
           colSpan={numberOfColumns}
           onUpdateListSettings={updateListSettings}
         />
-      </TableRowLink>
+      </TableRow>
     </TableFooter>
   );
 };

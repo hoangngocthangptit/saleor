@@ -95,7 +95,6 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = props => {
         fullWidth
         InputProps={{
           autoComplete: "organization",
-          spellCheck: false,
         }}
       />
       <FormSpacer />
@@ -113,7 +112,6 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = props => {
         fullWidth
         InputProps={{
           autoComplete: "address-line1",
-          spellCheck: false,
         }}
       />
       <FormSpacer />
@@ -131,7 +129,6 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = props => {
         fullWidth
         InputProps={{
           autoComplete: "address-line2",
-          spellCheck: false,
         }}
       />
       <FormSpacer />
@@ -150,7 +147,6 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = props => {
           fullWidth
           InputProps={{
             autoComplete: "address-level2",
-            spellCheck: false,
           }}
         />
         <TextField
@@ -167,7 +163,6 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = props => {
           fullWidth
           InputProps={{
             autoComplete: "postal-code",
-            spellCheck: false,
           }}
         />
       </Grid>
@@ -187,9 +182,6 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = props => {
           onChange={onCountryChange}
           value={data.country}
           choices={countries}
-          InputProps={{
-            spellCheck: false,
-          }}
         />
         <TextField
           disabled={disabled}
@@ -205,7 +197,6 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = props => {
           fullWidth
           InputProps={{
             autoComplete: "address-level1",
-            spellCheck: false,
           }}
         />
       </Grid>
@@ -224,7 +215,6 @@ const CompanyAddressForm: React.FC<CompanyAddressFormProps> = props => {
         onChange={onChange}
         InputProps={{
           autoComplete: "tel",
-          spellCheck: false,
         }}
       />
     </div>
